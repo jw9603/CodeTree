@@ -1,4 +1,4 @@
-def solution(clients, a, b):
+def sol(clients, a, b):
     cnt = 0
 
     for client in clients:
@@ -9,6 +9,7 @@ def solution(clients, a, b):
             cnt += client // b
             if client % b != 0:
                 cnt += 1
+    
     return cnt
 
 def main():
@@ -16,7 +17,7 @@ def main():
     clients = list(map(int, input().split()))
     a, b = map(int, input().split())
 
-    print(solution(clients, a, b))
+    print(sol(clients, a, b))
 
 if __name__ == '__main__':
     main()
