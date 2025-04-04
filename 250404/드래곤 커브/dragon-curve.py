@@ -1,33 +1,29 @@
-def main():
-    N = int(input())
-    visited = [[False] * 101 for _ in range(101)]
 
-    dx = [1, 0, -1, 0]
-    dy = [0, -1, 0, 1]
+dir = [(0,1),(-1,0),(0,-1),(1,0)]  # 각각 동북서남
 
-    for _ in range(N):
-        x, y, d, g = map(int, input().split())
+N = int(input())
+graph = [[0]*101 for _ in range(101)]
+for _ in range(N):
+    x, y, d, g = map(int, input().split())  # 각각 좌표, 시작방향, 세대 수
+    graph[x][y] += 1
+    todo = [d]
+    x = x+dir[d][0]
+    y = y+dir[d][1]
+    graph[x][y] += 1
+    todo = [(d+1)%4]  # 이쪽의 turn까지 0세대 처리
 
-        directions = [d]
-        for _ in range(g):
-            for i in reversed(range(len(directions))):
-                directions.append((directions[i] + 1) % 4)
-
-        visited[y][x] = True  # 시작점 마킹
-
-        for direction in directions:
-            x += dx[direction]
-            y += dy[direction]
-            if 0 <= x <= 100 and 0 <= y <= 100:
-                visited[y][x] = True
-
-    cnt = 0
-    for i in range(100):
-        for j in range(100):
-            if visited[i][j] and visited[i + 1][j] and visited[i][j + 1] and visited[i + 1][j + 1]:
-                cnt += 1
-
-    print(cnt)
-
-if __name__ == "__main__":
-    main()
+    for _ in range(g):  # 여기는 1세대부터 처리
+        for i in range(len(todo)):
+            x = x+dir[todo[i]][0]
+            y = y+dir[todo[i]][1]
+            graph[x][y] += 1
+        todo = todo[::-1]+todo
+        for i in range(len(todo)//2):
+            todo[i] += 1
+            todo[i] %= 4
+cnt = 0
+for i in range(100):
+    for j in range(100):
+        if graph[i][j] and graph[i+1][j] and graph[i][j+1] and graph[i+1][j+1]:
+            cnt += 1
+print(cnt)
