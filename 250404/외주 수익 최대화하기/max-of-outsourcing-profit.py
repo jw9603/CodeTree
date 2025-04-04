@@ -1,5 +1,5 @@
 def dfs(day, curr_profit):
-    global n, max_profit, schedules
+    global n, schedules, max_profit
 
     if day > n:
         max_profit = max(max_profit, curr_profit)
@@ -11,11 +11,11 @@ def dfs(day, curr_profit):
         dfs(day + schedules[day][0], curr_profit + schedules[day][1])
 
 def main():
-    global n, max_profit, schedules
+    global n, schedules, max_profit
     n = int(input().strip())
     schedules = [None] + [tuple(map(int, input().split())) for _ in range(n)]
 
-    max_profit = 0
+    max_profit = -float('inf')
 
     dfs(1, 0)
 
