@@ -14,13 +14,16 @@ def main():
             for i in reversed(range(len(directions))):
                 directions.append((directions[i] + 1) % 4)
         
-        visited[y][x] = True
+        points = [(x, y)]
         for direction in directions:
-            x += dx[direction]
-            y += dy[direction]
-
-            if 0 <= x <= 100 and 0 <= y <= 100:
-                visited[y][x] = True
+            last_x, last_y = points[-1]
+            nx = last_x + dx[direction]
+            ny = last_y + dy[direction]
+            points.append((nx, ny))
+        
+        for px, py in points:
+            if 0 <= px <= 100 and 0 <= py <= 100:
+                visited[py][px] = True
     
     cnt = 0
     for i in range(100):
