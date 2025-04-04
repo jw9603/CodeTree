@@ -6,7 +6,7 @@ def can_place(ladder, i, j, n):
     if j > 0 and ladder[i][j - 1]:
         return False
     
-    if j < n -2 and ladder[i][j + 1]:
+    if j < n - 2 and ladder[i][j + 1]:
         return False
     
     return True
@@ -33,13 +33,13 @@ def dfs(depth, ladder, n, h, row, col):
     if depth >= result:
         return
 
-    if depth == 3:
-        return
-    
     if simulate(ladder, n, h):
         result = depth
         return
 
+    if depth == 3:
+        return
+    
     for i in range(row, h):
         sj = col if row == i else 0
         for j in range(sj, n - 1):
