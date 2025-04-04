@@ -37,8 +37,8 @@ def dfs(depth, ladder, n, h, row, col):
         result = depth
         return
 
-    if depth == 3:
-        return
+    # if depth == 3:
+    #     return
     
     for i in range(row, h):
         sj = col if row == i else 0
