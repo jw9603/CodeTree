@@ -36,10 +36,7 @@ def dfs(depth, ladder, n, h, row, col):
     if simulate(ladder, n, h):
         result = depth
         return
-
-    # if depth == 3:
-    #     return
-    
+        
     for i in range(row, h):
         sj = col if row == i else 0
         for j in range(sj, n - 1):
