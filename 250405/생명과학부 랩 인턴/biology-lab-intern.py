@@ -65,7 +65,7 @@ def main():
 
     dust = [tuple(map(int, input().split())) for _ in range(k)]
 
-    print(find_dust(n, k, dust))
+    print(find_dust(n, m, dust))
 
 if __name__ == '__main__':
     main()
