@@ -65,9 +65,9 @@ def rotate(board, x, d, k, N):
             board[i].rotate(-k)
 
 def main():
-    N, M, T = map(int, input().split())
+    N, M, q = map(int, input().split())
     board = [deque(map(int, input().split())) for _ in range(N)]
-    operations = [tuple(map(int, input().split())) for _ in range(T)]
+    operations = [tuple(map(int, input().split())) for _ in range(q)]
 
     for x, d, k in operations:
         rotate(board, x, d, k, N)
