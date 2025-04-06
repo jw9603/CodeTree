@@ -47,7 +47,7 @@ def adjust_numbers(board, N, M):
     if not cnt:
         return
  
-    avg = total / cnt
+    avg = total // cnt
     for i in range(N):
         for j in range(M):
             if board[i][j] == 0: # 0은 원판에 적힌 수가 아님
