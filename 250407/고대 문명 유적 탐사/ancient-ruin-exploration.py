@@ -92,10 +92,14 @@ def rotate(grid, i, j):
 
     return new_grid
 
-def bfs(grid, visited, i, j):
+def bfs(grid, visited, i, j, flag):
+    cnt = 0
     queue = deque([(i, j)])
     visited[i][j] = True
-    connected = [(i, j)]
+    connected = set()
+    connected.add((i, j))
+    cnt += 1
+
     value = grid[i][j] # 탐색을 시작하는 값과 같은지 체크하기 위해 필요
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
@@ -106,18 +110,24 @@ def bfs(grid, visited, i, j):
             if 0 <= nr < 5 and 0 <= nc < 5 and not visited[nr][nc] and grid[nr][nc] == value:
                 visited[nr][nc] = True
                 queue.append((nr, nc))
-                connected.append((nr, nc))
+                connected.add((nr, nc))
+                cnt += 1
     
-    if len(connected) >= 3:
-        return connected
-    return []
+    if cnt >= 3:
+        if flag == 1:
+            for i, j in connected:
+                grid[i][j] = 0
+        return cnt
+    else:
+        return 0
 
-def count_and_remove(grid):
+def count_and_remove(grid, flag):
     '''
     같은 종류의 유물 조각이 3개 이상인 연결된 경우를 찾아 제거하고, 제거된 조각의 수를 반환
     조각의 수는 유물의 가치임   
 
     '''
+    
     visited = [[False] * 5 for _ in range(5)]
     total = 0
     removed = []
@@ -126,23 +136,9 @@ def count_and_remove(grid):
         for j in range(5):
             if not visited[i][j] and grid[i][j] != 0:
 
-                group = bfs(grid, visited, i, j)
-                if group:
-                    total += len(group)
-                    removed.extend(group)
+                total += bfs(grid, visited, i, j, flag)
     
-    for r, c in removed: # 유물이 된 것은 grid에 0으로 채움
-        grid[r][c] = 0
-
-    return total, removed
-
-def fill(grid, removed, nums):
-    # 열 번호가 작은 순으로, 열 번호가 같다면 행 번호가 큰 순
-    removed.sort(key=lambda x: (x[1], -x[0])) 
-
-    for r, c in removed:
-        if nums:
-            grid[r][c] = nums.popleft()
+    return total
 
 def simulate(grid, nums, K):
     results = []
@@ -158,7 +154,7 @@ def simulate(grid, nums, K):
                     for _ in range(rot):
                         temp = rotate(temp, i, j)
 
-                    cnt, _ = count_and_remove([row[:] for row in temp])
+                    cnt = count_and_remove([row[:] for row in temp], 0)
                     
                     # 가능한 회전의 방법 중 유물 1차 획득 가치를 최대화 하고,
                     # 그러한 방법이 여러가지인 경우 회전한 각도가 가장 작은 방법
@@ -174,13 +170,16 @@ def simulate(grid, nums, K):
         total_gain = 0
 
         while True:
-            cnt, removed = count_and_remove(grid)
+            cnt = count_and_remove(grid, 1)
             if cnt == 0: # 유물이 없으면 정지
                 break
 
             total_gain += cnt
 
-            fill(grid, removed, nums) # 유물의 빈칸을 체우기
+            for j in range(5):
+                for i in range(4, -1, -1):
+                    if grid[i][j] == 0:
+                        grid[i][j] = nums.popleft()
 
         results.append(total_gain)
     
