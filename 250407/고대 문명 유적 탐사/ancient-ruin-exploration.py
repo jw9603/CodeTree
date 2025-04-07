@@ -178,7 +178,7 @@ def simulate(grid, nums, K):
 
             for j in range(5):
                 for i in range(4, -1, -1):
-                    if grid[i][j] == 0:
+                    if grid[i][j] == 0 and nums:
                         grid[i][j] = nums.popleft()
 
         results.append(total_gain)
