@@ -147,8 +147,8 @@ def simulate(grid, nums, K):
         best = (-1, 0, 0, 0, [])  # (유물 수, 회전 횟수, i, j, 회전 결과)
 
         for rot in range(1, 4):  # 1회, 2회, 3회 회전 (90, 180, 270)
-            for i in range(3):
-                for j in range(3):
+            for j in range(3):
+                for i in range(3):
                     temp = [row[:] for row in grid]
 
                     for _ in range(rot):
@@ -191,5 +191,6 @@ def main():
 
     nums = deque(map(int, input().split()))
     simulate(grid, nums, K)
+
 if __name__ == "__main__":
     main()
