@@ -154,7 +154,7 @@ def simulate(grid, nums, K):
                     for _ in range(rot):
                         temp = rotate(temp, i, j)
 
-                    cnt = count_and_remove([row[:] for row in temp], 0)
+                    cnt = count_and_remove(temp, 0)
                     
                     # 가능한 회전의 방법 중 유물 1차 획득 가치를 최대화 하고,
                     # 그러한 방법이 여러가지인 경우 회전한 각도가 가장 작은 방법
