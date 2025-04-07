@@ -98,7 +98,7 @@ def bfs(grid, visited, i, j, flag):
     visited[i][j] = True
     connected = set()
     connected.add((i, j))
-    cnt += 1
+    # cnt += 1
 
     value = grid[i][j] # 탐색을 시작하는 값과 같은지 체크하기 위해 필요
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -111,13 +111,14 @@ def bfs(grid, visited, i, j, flag):
                 visited[nr][nc] = True
                 queue.append((nr, nc))
                 connected.add((nr, nc))
-                cnt += 1
+
     
-    if cnt >= 3:
+    # if cnt >= 3:
+    if len(connected) >= 3:
         if flag == 1:
             for i, j in connected:
                 grid[i][j] = 0
-        return cnt
+        return len(connected)
     else:
         return 0
 
@@ -125,7 +126,6 @@ def count_and_remove(grid, flag):
     '''
     같은 종류의 유물 조각이 3개 이상인 연결된 경우를 찾아 제거하고, 제거된 조각의 수를 반환
     조각의 수는 유물의 가치임   
-
     '''
     
     visited = [[False] * 5 for _ in range(5)]
