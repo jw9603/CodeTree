@@ -86,53 +86,72 @@ di = [-1, -1, 0, 1, 1, 1, 0, -1]
 dj = [0, 1, 1, 1, 0, -1, -1, -1]
 
 def find_route(si, sj, ei, ej):
-    q = deque()
-    v = [[0]*N for _ in range(N)]
-    q.append((si, sj))
-    v[si][sj] = (si, sj)
-    while q:
-        ci, cj = q.popleft()
+    queue = deque()
+    prev = [[0]*N for _ in range(N)]
+
+    queue.append((si, sj))
+    prev[si][sj] = (si, sj)
+    while queue:
+        ci, cj = queue.popleft()
+
         if (ci, cj) == (ei, ej):
-            route = []
-            ci, cj = v[ci][cj]
+            path = []
+            ci, cj = prev[ci][cj]
+
             while (ci, cj) != (si, sj):
-                route.append((ci, cj))
-                ci, cj = v[ci][cj]
-            return route[::-1]
+                path.append((ci, cj))
+                ci, cj = prev[ci][cj]
+            return path[::-1]
+
         for d in DRC:
+
             ni, nj = ci + d[0], cj + d[1]
-            if 0 <= ni < N and 0 <= nj < N and v[ni][nj] == 0 and arr[ni][nj] == 0:
-                v[ni][nj] = (ci, cj)
-                q.append((ni, nj))
+
+            if 0 <= ni < N and 0 <= nj < N and prev[ni][nj] == 0 and board[ni][nj] == 0:
+                prev[ni][nj] = (ci, cj)
+                queue.append((ni, nj))
     return -1
 
 def mark_line(v, ci, cj, dr):
+
     while 0 <= ci < N and 0 <= cj < N:
+
         v[ci][cj] = 2
         ci, cj = ci + di[dr], cj + dj[dr]
 
 def mark_safe(v, si, sj, dr, org_dr):
+
     ci, cj = si + di[dr], sj + dj[dr]
     mark_line(v, ci, cj, dr)
     ci, cj = si + di[org_dr], sj + dj[org_dr]
+
     while 0 <= ci < N and 0 <= cj < N:
+
         mark_line(v, ci, cj, dr)
         ci, cj = ci + di[org_dr], cj + dj[org_dr]
 
 def make_stone(marr, mi, mj, dr):
-    v = [[0]*N for _ in range(N)]
+
+    v = [[0] * N for _ in range(N)]
+
     cnt = 0
     ni, nj = mi + di[dr], mj + dj[dr]
+
     while 0 <= ni < N and 0 <= nj < N:
+
         v[ni][nj] = 1
         if marr[ni][nj] > 0:
             cnt += marr[ni][nj]
             ni, nj = ni + di[dr], nj + dj[dr]
             mark_line(v, ni, nj, dr)
             break
+
         ni, nj = ni + di[dr], nj + dj[dr]
+
     for org_dr in ((dr - 1) % 8, (dr + 1) % 8):
+
         si, sj = mi + di[org_dr], mj + dj[org_dr]
+
         while 0 <= si < N and 0 <= sj < N:
             if v[si][sj] == 0 and marr[si][sj] > 0:
                 v[si][sj] = 1
@@ -140,6 +159,7 @@ def make_stone(marr, mi, mj, dr):
                 mark_safe(v, si, sj, dr, org_dr)
                 break
             ci, cj = si, sj
+
             while 0 <= ci < N and 0 <= cj < N:
                 if v[ci][cj] == 0:
                     v[ci][cj] = 1
@@ -151,13 +171,16 @@ def make_stone(marr, mi, mj, dr):
                     break
                 ci, cj = ci + di[dr], cj + dj[dr]
             si, sj = si + di[org_dr], sj + dj[org_dr]
+
     return v, cnt
 
-def move_men(v, mi, mj):
+def move_warriors(v, mi, mj):
+
     move, attk = 0, 0
+
     for dirs in [DRC, DRC_SECOND]:
-        for idx in range(len(men)-1, -1, -1):
-            ci, cj = men[idx]
+        for idx in range(len(warriors)-1, -1, -1):
+            ci, cj = warriors[idx]
             if v[ci][cj] == 1:
                 continue
             dist = abs(mi - ci) + abs(mj - cj)
@@ -166,31 +189,31 @@ def move_men(v, mi, mj):
                 if 0 <= ni < N and 0 <= nj < N and v[ni][nj] != 1 and dist > abs(mi - ni) + abs(mj - nj):
                     if (ni, nj) == (mi, mj):
                         attk += 1
-                        men.pop(idx)
+                        warriors.pop(idx)
                     else:
-                        men[idx] = [ni, nj]
+                        warriors[idx] = [ni, nj]
                     move += 1
                     break
     return move, attk
 
 def main():
-    global N, men, arr
+    global N, warriors, board
     N, M = map(int, input().split())
     si, sj, ei, ej = map(int, input().split())
     warriors_input = list(map(int, input().split()))
-    men = [[warriors_input[i], warriors_input[i+1]] for i in range(0, M*2, 2)]
-    arr = [list(map(int, input().split())) for _ in range(N)]
+    warriors = [[warriors_input[i], warriors_input[i+1]] for i in range(0, M*2, 2)]
+    board = [list(map(int, input().split())) for _ in range(N)]
 
     route = find_route(si, sj, ei, ej)
     if route == -1:
         print(-1)
     else:
         for mi, mj in route:
-            for i in range(len(men)-1, -1, -1):
-                if men[i] == [mi, mj]:
-                    men.pop(i)
+            for i in range(len(warriors)-1, -1, -1):
+                if warriors[i] == [mi, mj]:
+                    warriors.pop(i)
             marr = [[0]*N for _ in range(N)]
-            for ti, tj in men:
+            for ti, tj in warriors:
                 marr[ti][tj] += 1
             mx_stone = -1
             v = []
@@ -199,7 +222,7 @@ def main():
                 if mx_stone < tstone:
                     mx_stone = tstone
                     v = tv
-            move_cnt, attk_cnt = move_men(v, mi, mj)
+            move_cnt, attk_cnt = move_warriors(v, mi, mj)
             print(move_cnt, mx_stone, attk_cnt)
         print(0)
 
