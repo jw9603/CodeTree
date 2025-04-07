@@ -279,7 +279,7 @@ def simulate(grid, relics, K):
 
         results.append(total_gain)
 
-    print(*results)
+    print(*results if results else '')
 
 def main():
     K, M = map(int, input().split())
