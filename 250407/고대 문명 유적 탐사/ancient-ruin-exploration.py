@@ -144,7 +144,7 @@ def simulate(grid, nums, K):
     results = []
 
     for _ in range(K):  # K턴을 진행 (유물 획득을 못하면 즉시 종료)
-        best = (-1, 0, 0, 0, [])  # (유물 수, 회전 횟수, i, j, 회전 결과)
+        best = (-1, 0, 0, 0, [])  # (유물 수, 회전 횟수, 열, 행, 회전 결과)
 
         for rot in range(1, 4):  # 1회, 2회, 3회 회전 (90, 180, 270)
             for j in range(3):
@@ -160,7 +160,7 @@ def simulate(grid, nums, K):
                     # 그러한 방법이 여러가지인 경우 회전한 각도가 가장 작은 방법
                     # 그러한 경우도 여러가지인 경우 회전 중심 좌표가 열이 가장 작은 구간, 이것도 같으면 행
                     if cnt > best[0] or (cnt == best[0] and (rot, j, i) < (best[1], best[2], best[3])):
-                        best = (cnt, rot, i, j, temp)
+                        best = (cnt, rot, j, i, temp)
 
         if best[0] == 0:
             break  # 유물 못얻으면 종료
