@@ -86,8 +86,9 @@ di = [-1, -1, 0, 1, 1, 1, 0, -1]
 dj = [0, 1, 1, 1, 0, -1, -1, -1]
 
 def find_route(si, sj, ei, ej):
+
     queue = deque()
-    prev = [[0]*N for _ in range(N)]
+    prev = [[0] * N for _ in range(N)]
 
     queue.append((si, sj))
     prev[si][sj] = (si, sj)
@@ -101,6 +102,7 @@ def find_route(si, sj, ei, ej):
             while (ci, cj) != (si, sj):
                 path.append((ci, cj))
                 ci, cj = prev[ci][cj]
+
             return path[::-1]
 
         for d in DRC:
@@ -130,7 +132,7 @@ def mark_safe(v, si, sj, dr, org_dr):
         mark_line(v, ci, cj, dr)
         ci, cj = ci + di[org_dr], cj + dj[org_dr]
 
-def make_stone(marr, mi, mj, dr):
+def make_stone(warr, mi, mj, dr):
 
     v = [[0] * N for _ in range(N)]
 
@@ -140,60 +142,69 @@ def make_stone(marr, mi, mj, dr):
     while 0 <= ni < N and 0 <= nj < N:
 
         v[ni][nj] = 1
-        if marr[ni][nj] > 0:
-            cnt += marr[ni][nj]
+        if warr[ni][nj] > 0:
+            cnt += warr[ni][nj]
             ni, nj = ni + di[dr], nj + dj[dr]
             mark_line(v, ni, nj, dr)
             break
 
         ni, nj = ni + di[dr], nj + dj[dr]
 
-    for org_dr in ((dr - 1) % 8, (dr + 1) % 8):
+    for new_dr in ((dr - 1) % 8, (dr + 1) % 8):
 
-        si, sj = mi + di[org_dr], mj + dj[org_dr]
+        si, sj = mi + di[new_dr], mj + dj[new_dr]
 
         while 0 <= si < N and 0 <= sj < N:
-            if v[si][sj] == 0 and marr[si][sj] > 0:
+
+            if v[si][sj] == 0 and warr[si][sj] > 0:
                 v[si][sj] = 1
-                cnt += marr[si][sj]
-                mark_safe(v, si, sj, dr, org_dr)
+                cnt += warr[si][sj]
+                mark_safe(v, si, sj, dr, new_dr)
                 break
+
             ci, cj = si, sj
 
             while 0 <= ci < N and 0 <= cj < N:
                 if v[ci][cj] == 0:
                     v[ci][cj] = 1
-                    if marr[ci][cj] > 0:
-                        cnt += marr[ci][cj]
-                        mark_safe(v, ci, cj, dr, org_dr)
+                    if warr[ci][cj] > 0:
+                        cnt += warr[ci][cj]
+                        mark_safe(v, ci, cj, dr, new_dr)
                         break
                 else:
                     break
+
                 ci, cj = ci + di[dr], cj + dj[dr]
-            si, sj = si + di[org_dr], sj + dj[org_dr]
+
+            si, sj = si + di[new_dr], sj + dj[new_dr]
 
     return v, cnt
 
-def move_warriors(v, mi, mj):
+def move_warriors(medusa_map, mi, mj):
 
     move, attk = 0, 0
 
     for dirs in [DRC, DRC_SECOND]:
         for idx in range(len(warriors)-1, -1, -1):
+
             ci, cj = warriors[idx]
-            if v[ci][cj] == 1:
+            if medusa_map[ci][cj] == 1:
                 continue
+
             dist = abs(mi - ci) + abs(mj - cj)
+
             for d in dirs:
                 ni, nj = ci + d[0], cj + d[1]
-                if 0 <= ni < N and 0 <= nj < N and v[ni][nj] != 1 and dist > abs(mi - ni) + abs(mj - nj):
+                if 0 <= ni < N and 0 <= nj < N and medusa_map[ni][nj] != 1 and dist > abs(mi - ni) + abs(mj - nj):
                     if (ni, nj) == (mi, mj):
                         attk += 1
                         warriors.pop(idx)
                     else:
                         warriors[idx] = [ni, nj]
+
                     move += 1
                     break
+
     return move, attk
 
 def main():
@@ -201,29 +212,41 @@ def main():
     N, M = map(int, input().split())
     si, sj, ei, ej = map(int, input().split())
     warriors_input = list(map(int, input().split()))
-    warriors = [[warriors_input[i], warriors_input[i+1]] for i in range(0, M*2, 2)]
+    warriors = [[warriors_input[i], warriors_input[i+1]] for i in range(0, M * 2, 2)]
     board = [list(map(int, input().split())) for _ in range(N)]
 
     route = find_route(si, sj, ei, ej)
     if route == -1:
         print(-1)
+
     else:
+        # 메두사는 도로를 따라 한 칸 이동, 공원까지 최당 경로
         for mi, mj in route:
+
             for i in range(len(warriors)-1, -1, -1):
+                # 메두사가 이동한 칸에 전사가 있을 경우 전사는 메두사에게 공격을 받고 사라짐
                 if warriors[i] == [mi, mj]:
                     warriors.pop(i)
-            marr = [[0]*N for _ in range(N)]
+
+            # 각 위치
+            warr = [[0] * N for _ in range(N)]
+
             for ti, tj in warriors:
-                marr[ti][tj] += 1
-            mx_stone = -1
-            v = []
+                warr[ti][tj] += 1
+
+            max_stone = -1
+            medusa_map = []
+
             for dr in (0, 4, 6, 2):
-                tv, tstone = make_stone(marr, mi, mj, dr)
-                if mx_stone < tstone:
-                    mx_stone = tstone
-                    v = tv
-            move_cnt, attk_cnt = move_warriors(v, mi, mj)
-            print(move_cnt, mx_stone, attk_cnt)
+                medusa_map_new, stone = make_stone(warr, mi, mj, dr)
+                
+                if max_stone < stone:
+                    max_stone = stone
+                    medusa_map = medusa_map_new
+
+            move_cnt, attk_cnt = move_warriors(medusa_map, mi, mj)
+
+            print(move_cnt, max_stone, attk_cnt)
         print(0)
 
 if __name__ == '__main__':
