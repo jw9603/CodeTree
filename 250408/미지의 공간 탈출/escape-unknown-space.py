@@ -106,11 +106,11 @@ def find_wall_exit(N, M, board):
             if board[i][j + 1] == 0:    # 3 시작 지점 기준으로 우측 한 칸
                 return 0, M - 1, M - 1 - (i- base_i), i, j + 1
             elif board[i][j - 1] == 0:  # 3 시작 지점 기준으로 좌측 한 칸
-                return 1, M - 1, M - 1, i - base_i, i, j - 1
+                return 1, M - 1, i - base_i, i, j - 1
             elif board[i + 1][j] == 0:  # 3 시작 지점기준으로 아래 한 칸
                 return 2, M - 1, j - base_j, i + 1, j
             elif board[i - 1][j] == 0:  # 3 시작 지점 기준으로 위 한 칸
-                return 3, M - 1, M - 1 - (j - base_j),i - 1, j
+                return 3, M - 1, M - 1 - (j - base_j), i - 1, j
     
 # 포기,,,! -> 좌표 변환 실패
 def bfs_3d(board3, M, st, si, sj, et, ei, ej):
