@@ -55,7 +55,8 @@ def push_knight(start, dr, info, board, N):
     체력이 0이되면 사라짐
     밀렸더라도 밀쳐진 위치에 함정이 전혀 없다면 그 기사는 피해를 전혀 입지 않게 됨.
     '''
-    di = [-1, 0, -1, 0]
+    # 상우하좌
+    di = [-1, 0, 1, 0]
     dj = [0, 1, 0, -1]
     queue = deque([start])
 
