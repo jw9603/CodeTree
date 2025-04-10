@@ -221,6 +221,7 @@ def bfs(N, M, board, si, sj, ei, ej):
         # 레이저가 공격 대상에게 도착했다면? 그 경로들의 포탑들에게도 데미지를 줘야한다.
         if (ci, cj) == (ei, ej):
             board[ei][ej] = max(0, board[ei][ej] - attack_power)
+            fight_set.add((ei, ej))
             while True:
                 ci, cj = visited[ci][cj]
                 if (ci, cj) == (si, sj):
