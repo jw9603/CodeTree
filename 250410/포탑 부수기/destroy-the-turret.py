@@ -74,6 +74,7 @@
 ########################################### 알고리즘 ###########################################
 from collections import deque
 def bfs(N, M, board, si, sj, ei, ej):
+    global fight_set
     '''
     레이저 공격
     부서진 포탑(0)이 있는 위치는 지날 수 없다.
@@ -110,6 +111,7 @@ def bfs(N, M, board, si, sj, ei, ej):
     return False
 
 def bomb(N, M, board, si, sj, ei, ej):
+    global fight_set
     '''
     공격 대상은 공격자의 공격력만큼 피해를 받는다.
     추가적으로 주위 8개의 방향에 있는 포탑도 피해를 입는다. -> 공격력의 절반 만큼의 피해를 받는다.
