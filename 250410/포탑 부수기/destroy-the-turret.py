@@ -72,27 +72,153 @@
 # 2. 각 포탑들이 언제 최근에 공격햇는지를 계속 업데이트 필요
 
 ########################################### 알고리즘 ###########################################
+# from collections import deque
+# def bfs(N, M, board, si, sj, ei, ej):
+#     global fight_set
+#     '''
+#     레이저 공격
+#     부서진 포탑(0)이 있는 위치는 지날 수 없다.
+#     가장자리에서 막힌 방향이면 반대편으로 나온다. -> %계산
+#     레이저 공격은 공격자의 위치에서 공격 대상 포탑까지의 최단 경로로 공격
+#     만약 그러한 경로가 존재하지 않는다면 포탄 공격
+#     우 하 좌 상의 우선순위
+#     '''
+#     queue = deque([(si, sj)])
+#     directions1 = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+#     visited = [[[] for _ in range(M)] for _ in range(N)]
+#     visited[si][sj] = (si, sj)
+#     attack_power = board[si][sj]
+
+#     while queue:
+#         ci, cj = queue.popleft()
+        
+#         # 레이저가 도착햇으면 경로를 역추적하면서 피해 계산
+#         if (ci, cj) == (ei, ej):
+#             board[ei][ej] = max(0, board[ei][ej] - attack_power)
+#             while True:
+#                 ci, cj = visited[ci][cj]
+#                 if (ci, cj) == (si, sj):
+#                     return True
+#                 board[ci][cj] = max(0, board[ci][cj] - attack_power // 2)
+#                 fight_set.add((ci, cj))
+        
+#         for di, dj in directions1:
+#             ni, nj = (ci + di) % N, (cj + dj) % M
+#             if not visited[ni][nj] and board[ni][nj] > 0:
+#                 queue.append((ni, nj))
+#                 visited[ni][nj] = (ci, cj)
+    
+#     return False
+
+# def bomb(N, M, board, si, sj, ei, ej):
+#     global fight_set
+#     '''
+#     공격 대상은 공격자의 공격력만큼 피해를 받는다.
+#     추가적으로 주위 8개의 방향에 있는 포탑도 피해를 입는다. -> 공격력의 절반 만큼의 피해를 받는다.
+#     공격자는 영향을 받지 않는다.
+#     만약 가장자리에 포탄이 떨어졌다면, 포탄의 추가 피해가 반대편 격자에 미치게 된다.
+#     '''
+#     attack_power = board[si][sj]
+#     board[ei][ej] = max(0, board[ei][ej] - attack_power)
+#     directions2 = [(-1, -1), (-1, 1), (1, -1), (1, 1), (0, -1), (0, 1), (-1, 0), (1, 0)]
+
+#     for di, dj in directions2:
+#         ni, nj = (ei + di) % N, (ej + dj) % M
+#         if (ni, nj) != (si, sj):
+#             board[ni][nj] = max(0, board[ni][nj] - attack_power // 2)
+#             fight_set.add((ni, nj))
+
+# def simulate(N, M, K, board, attack_turn):
+#     global fight_set
+
+#     for t in range(1, K + 1):
+#         min_power, max_turn, si, sj = 5001, 0, -1, -1
+#         # 1. 공격자 선정: 공격력이 가장 낮은 포탑부터 탐색
+#         for i in range(N):
+#             for j in range(M):
+#                 if board[i][j] <= 0:
+#                     continue
+                
+#                 if min_power > board[i][j] or (min_power == board[i][j] and max_turn < attack_turn[i][j]) or (min_power == board[i][j] and max_turn == attack_turn[i][j] and si +sj < i + j) or (min_power == board[i][j] and max_turn == attack_turn[i][j] and si + sj == i + j and sj < j):
+#                     min_power, max_turn, si, sj = board[i][j], attack_turn[i][j], i, j
+        
+#         # 2. 공격을 받는 대상자 선정: 공격력이 가장 강한 포탑을 공격
+#         max_power, min_turn, ei, ej = 0, t, N, M
+#         for i in range(N):
+#             for j in range(M):
+#                 if board[i][j] <= 0:
+#                     continue
+                
+#                 if max_power < board[i][j] or (max_power == board[i][j] and min_turn > attack_turn[i][j]) or (max_power == board[i][j] and min_turn == attack_turn[i][j] and ei + ej > i + j) or (max_power == board[i][j] and min_turn == attack_turn[i][j] and ei + ej== i + j and ej > j): 
+#                     max_power, min_turn, ei, ej = board[i][j], attack_turn[i][j], i, j
+
+#         # 3. 공격자의 공격력 증가
+#         board[si][sj] += (N + M)
+#         attack_turn[si][sj] = t
+#         fight_set = set()
+#         fight_set.add((si, sj))
+#         fight_set.add((ei, ej))
+
+#         # 레이저 공격
+#         if not bfs(N, M, board, si, sj, ei, ej):
+#             # 만약 레이저 공격에 실패한다면? -> 포탄
+#             bomb(N, M, board, si, sj, ei, ej)
+
+#         # 포탑 정비: 공격에 무관했던 포탑은 공격력이 1씩 올라간다.
+#         for i in range(N):
+#             for j in range(M):
+#                 if board[i][j] > 0 and (i, j) not in fight_set:
+#                     board[i][j] += 1
+
+#         # 생존한 포탑 수 확인: 부서지지 않은 포탑이 1개가 된다면 그 즉시 중지
+#         cnt = sum(1 for i in range(N) for j in range(M) if board[i][j] > 0)
+#         if cnt <= 1:
+#             break
+
+#     return max(map(max, board))
+
+# def main():
+#     # 입력들
+#     N, M, K = map(int, input().split())
+#     board = [list(map(int, input().split())) for _ in range(N)]
+#     attack_turn = [[0] * M for _ in range(N)]
+
+#     # K번의 톤이 돌아가는 simulate()함수
+#     print(simulate(N, M, K, board, attack_turn))
+
+# if __name__ == '__main__':
+#     main()
+# N X M 격자, 모든 위치에는 포탑 존재
+# 각 포탑에는 공격력이 존재하며, 상황에 따라 공격력이 줄어들거나 늘어날 수 있다.
+# 또한, 공격력이 0 이하가 된다면, 해당 포탑은 부서지며 더 이상의 공격을 할 수 없다.
+# 시작부터 공격력이 0인 포탑이 존재할 수 있다.
+
+# 하나의 턴은 다음의 4가지 액션을 순서대로 수행, 총 K턴
+# 만약 부서지지 않은 포탑이 1개가 된다면 그 즉시 중지
+
+# 1. 공격자 선정
+# 2. 공격자의 공격
+# 3. 포탑 부서짐
+# 4. 포탑 정비
 from collections import deque
 def bfs(N, M, board, si, sj, ei, ej):
-    global fight_set
     '''
     레이저 공격
-    부서진 포탑(0)이 있는 위치는 지날 수 없다.
-    가장자리에서 막힌 방향이면 반대편으로 나온다. -> %계산
-    레이저 공격은 공격자의 위치에서 공격 대상 포탑까지의 최단 경로로 공격
-    만약 그러한 경로가 존재하지 않는다면 포탄 공격
-    우 하 좌 상의 우선순위
+    상하좌우의 4개 방향
+    부서진 포탑이 있는 위치는 지날 수 없다.
     '''
+    global fight_set
+
     queue = deque([(si, sj)])
-    directions1 = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     visited = [[[] for _ in range(M)] for _ in range(N)]
     visited[si][sj] = (si, sj)
     attack_power = board[si][sj]
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     while queue:
         ci, cj = queue.popleft()
-        
-        # 레이저가 도착햇으면 경로를 역추적하면서 피해 계산
+
+        # 레이저가 공격 대상에게 도착했다면? 그 경로들의 포탑들에게도 데미지를 줘야한다.
         if (ci, cj) == (ei, ej):
             board[ei][ej] = max(0, board[ei][ej] - attack_power)
             while True:
@@ -101,49 +227,46 @@ def bfs(N, M, board, si, sj, ei, ej):
                     return True
                 board[ci][cj] = max(0, board[ci][cj] - attack_power // 2)
                 fight_set.add((ci, cj))
-        
-        for di, dj in directions1:
+            
+        for di, dj in directions:
             ni, nj = (ci + di) % N, (cj + dj) % M
             if not visited[ni][nj] and board[ni][nj] > 0:
                 queue.append((ni, nj))
                 visited[ni][nj] = (ci, cj)
     
     return False
-
 def bomb(N, M, board, si, sj, ei, ej):
     global fight_set
-    '''
-    공격 대상은 공격자의 공격력만큼 피해를 받는다.
-    추가적으로 주위 8개의 방향에 있는 포탑도 피해를 입는다. -> 공격력의 절반 만큼의 피해를 받는다.
-    공격자는 영향을 받지 않는다.
-    만약 가장자리에 포탄이 떨어졌다면, 포탄의 추가 피해가 반대편 격자에 미치게 된다.
-    '''
+
     attack_power = board[si][sj]
     board[ei][ej] = max(0, board[ei][ej] - attack_power)
-    directions2 = [(-1, -1), (-1, 1), (1, -1), (1, 1), (0, -1), (0, 1), (-1, 0), (1, 0)]
+    directions = [(-1, -1), (-1, 1), (1, -1), (1, 1), (0, -1), (0, 1), (1, 0), (-1, 0)]
 
-    for di, dj in directions2:
+    for di, dj in directions:
         ni, nj = (ei + di) % N, (ej + dj) % M
         if (ni, nj) != (si, sj):
             board[ni][nj] = max(0, board[ni][nj] - attack_power // 2)
             fight_set.add((ni, nj))
 
+
+
 def simulate(N, M, K, board, attack_turn):
     global fight_set
-
+    # 0. K턴 실행
+    # 여기 반복문에서는 1부터 하는게 좋다. 왜냐하면 각 턴 정보가 attack_turn의 인덱스로 들어가기 때문
     for t in range(1, K + 1):
+        # 1. 공격자 선정
         min_power, max_turn, si, sj = 5001, 0, -1, -1
-        # 1. 공격자 선정: 공격력이 가장 낮은 포탑부터 탐색
         for i in range(N):
             for j in range(M):
                 if board[i][j] <= 0:
                     continue
-                
-                if min_power > board[i][j] or (min_power == board[i][j] and max_turn < attack_turn[i][j]) or (min_power == board[i][j] and max_turn == attack_turn[i][j] and si +sj < i + j) or (min_power == board[i][j] and max_turn == attack_turn[i][j] and si + sj == i + j and sj < j):
+
+                if min_power > board[i][j] or (min_power == board[i][j] and max_turn < attack_turn[i][j]) or (min_power == board[i][j] and max_turn == attack_turn[i][j] and si + sj < i + j) or (min_power == board[i][j] and max_turn == attack_turn[i][j] and si + sj == i + j and sj < j):
                     min_power, max_turn, si, sj = board[i][j], attack_turn[i][j], i, j
-        
-        # 2. 공격을 받는 대상자 선정: 공격력이 가장 강한 포탑을 공격
-        max_power, min_turn, ei, ej = 0, t, N, M
+            
+        # 2. 공격자의 공격
+        max_power, min_turn, ei, ej = 0, 1001, N, M
         for i in range(N):
             for j in range(M):
                 if board[i][j] <= 0:
@@ -151,39 +274,40 @@ def simulate(N, M, K, board, attack_turn):
                 
                 if max_power < board[i][j] or (max_power == board[i][j] and min_turn > attack_turn[i][j]) or (max_power == board[i][j] and min_turn == attack_turn[i][j] and ei + ej > i + j) or (max_power == board[i][j] and min_turn == attack_turn[i][j] and ei + ej== i + j and ej > j): 
                     max_power, min_turn, ei, ej = board[i][j], attack_turn[i][j], i, j
-
-        # 3. 공격자의 공격력 증가
+        
+        # 3. 공격자 (si, sj)의 공격력 증가
         board[si][sj] += (N + M)
         attack_turn[si][sj] = t
         fight_set = set()
         fight_set.add((si, sj))
         fight_set.add((ei, ej))
 
-        # 레이저 공격
+        # 4. 레이저 공격
+        # 레이저 공격은 공격자의 위치에서 공격 대상 포탑까지의 최단 경로로 공격
+        # 만약 그러한 경로가 존재하지 않는다면 포탄 공격
         if not bfs(N, M, board, si, sj, ei, ej):
-            # 만약 레이저 공격에 실패한다면? -> 포탄
             bomb(N, M, board, si, sj, ei, ej)
-
-        # 포탑 정비: 공격에 무관했던 포탑은 공격력이 1씩 올라간다.
+        
+        # 5. 포탑 정비
         for i in range(N):
-            for j in range(M):
+            for j in range(N):
                 if board[i][j] > 0 and (i, j) not in fight_set:
                     board[i][j] += 1
 
-        # 생존한 포탑 수 확인: 부서지지 않은 포탑이 1개가 된다면 그 즉시 중지
-        cnt = sum(1 for i in range(N) for j in range(M) if board[i][j] > 0)
+        # 남아 있는 포탑의 수 확인
+        cnt = sum(1 for i in range(N) for j in range(N) if board[i][j] > 0)
         if cnt <= 1:
             break
 
     return max(map(max, board))
 
 def main():
-    # 입력들
     N, M, K = map(int, input().split())
     board = [list(map(int, input().split())) for _ in range(N)]
+
+    # 최근에 공격했다는 것을 담는 리스트 
     attack_turn = [[0] * M for _ in range(N)]
 
-    # K번의 톤이 돌아가는 simulate()함수
     print(simulate(N, M, K, board, attack_turn))
 
 if __name__ == '__main__':
