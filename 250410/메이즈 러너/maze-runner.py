@@ -51,7 +51,7 @@ def move_players(N, board, ei, ej):
     total_moves = 0
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
     new_board = [row[:] for row in board]
-    escaped = []
+    escaped = 0
 
     for i in range(N):
         for j in range(N):
@@ -66,10 +66,10 @@ def move_players(N, board, ei, ej):
                         new_board[i][j] -= board[i][j]
                         
                         # 도착한 곳이 출구가 아니라면, 참가자 수 만큼 해당 칸에 더함
-                        if board[ni][nj] == -11:
-                            escaped.append((i, j))
-                        else:
+                        if board[ni][nj] != -11:
                             new_board[ni][nj] += board[i][j]
+                        else:
+                            escaped += -board[i][j]
                         break
 
     return new_board, total_moves, escaped
@@ -109,9 +109,9 @@ def find_square(board, N, ei, ej):
 
 
 
-def simulate(N, K, board, ei, ej, players):
+def simulate(N, M, K, board, ei, ej):
     total_distance = 0
-    player_set = set(players)
+    cnt = M
 
     for _ in range(K): #  매 초마다
         # 1. 모든 참가자가 동시에 1칸 움직인다.
@@ -119,11 +119,7 @@ def simulate(N, K, board, ei, ej, players):
         total_distance -= moved
 
         # 만약 K초 전에 모든 참가자가 탈출에 성공한다면 게임이 끝난다.
-        for pos in escaped:
-            # remove는 해당 값이 없으면 에러발생, 하지만 discard는 조용히 무시
-            player_set.discard(pos)
-        
-        if not player_set:
+        if cnt == 0:
             break
         
         # 미로가 회전
@@ -141,16 +137,15 @@ def main():
 
     # board에 0은 빈 칸, 1~9는 벽, -1은 사람
     board = [list(map(int, input().split())) for _ in range(N)]
-    players = []
+
     for _ in range(M):
         i, j = map(lambda x: int(x) - 1, input().split())
         board[i][j] -= 1 # 한 칸에 2명 이상의 참가자가 있을 수 있다.
-        players.append((i, j))
     
     ei, ej = map(lambda x: int(x) - 1, input().split())
     board[ei][ej] = -11 # 출구
 
-    total_move, exit_i, exit_j = simulate(N, K, board, ei, ej, players)
+    total_move, exit_i, exit_j = simulate(N, M, K, board, ei, ej)
 
     print(total_move)
     print(exit_i, exit_j)
