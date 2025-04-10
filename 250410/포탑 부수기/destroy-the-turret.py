@@ -266,7 +266,7 @@ def simulate(N, M, K, board, attack_turn):
                     min_power, max_turn, si, sj = board[i][j], attack_turn[i][j], i, j
             
         # 2. 공격자의 공격
-        max_power, min_turn, ei, ej = 0, 1001, N, M
+        max_power, min_turn, ei, ej = 0, t, N, M
         for i in range(N):
             for j in range(M):
                 if board[i][j] <= 0:
