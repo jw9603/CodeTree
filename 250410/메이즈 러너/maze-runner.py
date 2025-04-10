@@ -47,8 +47,119 @@
 
 # 3. 그 다음 미로가 회전한다.
 ################################### 알고리즘 ###################################
+# def move_players(N, board, ei, ej):
+#     total_moves = 0
+#     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+#     new_board = [row[:] for row in board]
+#     escaped = 0
+
+#     for i in range(N):
+#         for j in range(N):
+#             if -11 < board[i][j] < 0:
+#                 dist = abs(ei - i) + abs(ej - j)
+#                 for di, dj in directions:  # 상하좌우로 움직일 수 있으며
+#                     ni, nj = i + di, j + dj
+                    
+#                     # 벽이 없는 곳이여야 하며 움직인 칸은 현재 머물러 있던 칸보다 출구까지의 최단 거리가 가까워야 한다.
+#                     if 0 <= ni < N and 0 <= nj < N and board[ni][nj] <= 0 and dist > abs(ei - ni) + abs(ej - nj):
+#                         total_moves += board[i][j]
+#                         new_board[i][j] -= board[i][j]
+                        
+#                         # 도착한 곳이 출구가 아니라면, 참가자 수 만큼 해당 칸에 더함
+#                         if board[ni][nj] != -11:
+#                             new_board[ni][nj] += board[i][j]
+#                         else:
+#                             escaped += -board[i][j]
+#                         break
+
+#     return new_board, total_moves, escaped
+
+# def rotate(board, N, ei, ej):
+#     '''
+#     한 명 이상의 참가자와 출구를 포함한 가장 작은 정사각형을 잡는다.
+#     '''
+#     si, sj, l = find_square(board, N, ei, ej)
+#     tmp = [row[:] for row in board]
+#     for i in range(l):
+#         for j in range(l):
+#             tmp[si + i][sj + j] = board[si + l - 1 - j][sj + i]
+#             if tmp[si + i][sj + j] > 0:
+#                 tmp[si + i][sj + j] -= 1
+
+#     return tmp
+
+
+# def find_square(board, N, ei, ej):
+#     '''
+#     한 명 이상의 참가자와 출구를 무조건 포함하는 가장 작은 정사각형
+#     '''
+#     row_len = N
+#     for i in range(N):
+#         for j in range(N):
+#             if -11 < board[i][j] < 0:
+#                 row_len = min(row_len, max(abs(ei - i), abs(ej - j)))
+
+#     for si in range(N - row_len):
+#         for sj in range(N - row_len):
+#             if si <= ei <= si + row_len and sj <= ej <= sj + row_len:
+#                 for i in range(si, si + row_len + 1):
+#                     for j in range(sj, sj + row_len + 1):
+#                         if -11 < board[i][j] < 0:
+#                             return si, sj, row_len + 1
+
+
+
+# def simulate(N, M, K, board, ei, ej):
+#     total_distance = 0
+#     cnt = M
+
+#     for _ in range(K): #  매 초마다
+#         # 1. 모든 참가자가 동시에 1칸 움직인다.
+#         board, moved, escaped = move_players(N, board, ei, ej)
+#         total_distance -= moved
+
+#         cnt -= escaped
+
+#         # 만약 K초 전에 모든 참가자가 탈출에 성공한다면 게임이 끝난다.
+#         if cnt == 0:
+#             break
+        
+#         # 미로가 회전
+#         board = rotate(board, N, ei, ej)
+    
+#         for i in range(N):
+#             for j in range(N):
+#                 if board[i][j] == -11:
+#                     ei, ej = i, j # 출구의 위치를 업데이트
+
+#     return total_distance, ei + 1, ej + 1
+
+# def main():
+#     N, M, K = map(int, input().split())
+
+#     # board에 0은 빈 칸, 1~9는 벽, -1은 사람
+#     board = [list(map(int, input().split())) for _ in range(N)]
+
+#     for _ in range(M):
+#         i, j = map(lambda x: int(x) - 1, input().split())
+#         board[i][j] -= 1 # 한 칸에 2명 이상의 참가자가 있을 수 있다.
+    
+#     ei, ej = map(lambda x: int(x) - 1, input().split())
+#     board[ei][ej] = -11 # 출구
+
+#     total_move, exit_i, exit_j = simulate(N, M, K, board, ei, ej)
+
+#     print(total_move)
+#     print(exit_i, exit_j)
+
+# if __name__ == '__main__':
+#     main()
+
 def move_players(N, board, ei, ej):
-    total_moves = 0
+    '''
+    (ei, ej) : 출구
+    '''
+    total_move = 0
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
     new_board = [row[:] for row in board]
     escaped = 0
@@ -56,49 +167,47 @@ def move_players(N, board, ei, ej):
     for i in range(N):
         for j in range(N):
             if -11 < board[i][j] < 0:
+                # 이 조건문을 통과했다는 것은 참가자라는 뜻
                 dist = abs(ei - i) + abs(ej - j)
-                for di, dj in directions:  # 상하좌우로 움직일 수 있으며
+
+                for di, dj in directions:
                     ni, nj = i + di, j + dj
-                    
-                    # 벽이 없는 곳이여야 하며 움직인 칸은 현재 머물러 있던 칸보다 출구까지의 최단 거리가 가까워야 한다.
-                    if 0 <= ni < N and 0 <= nj < N and board[ni][nj] <= 0 and dist > abs(ei - ni) + abs(ej - nj):
-                        total_moves += board[i][j]
+
+                    # 한 칸 이동 가능하며, 벽이 없는 곳이어야 한다.
+                    # 움직인 칸(ni, nj)은 현재 머물러 있던 칸보다 출구까지의 최단거리(dist)가 가까워야 한다.
+                    if 0 <= ni < N and 0 <= nj < N and board[ni][nj] <= 0 and dist > abs(ni - ei) + abs(nj - ej):
+                        total_move += board[i][j]
                         new_board[i][j] -= board[i][j]
-                        
-                        # 도착한 곳이 출구가 아니라면, 참가자 수 만큼 해당 칸에 더함
+
                         if board[ni][nj] != -11:
                             new_board[ni][nj] += board[i][j]
                         else:
                             escaped += -board[i][j]
                         break
 
-    return new_board, total_moves, escaped
+    return new_board, total_move, escaped
 
 def rotate(board, N, ei, ej):
-    '''
-    한 명 이상의 참가자와 출구를 포함한 가장 작은 정사각형을 잡는다.
-    '''
-    si, sj, l = find_square(board, N, ei, ej)
+    si, sj, L = find_square(board, N, ei, ej)
     tmp = [row[:] for row in board]
-    for i in range(l):
-        for j in range(l):
-            tmp[si + i][sj + j] = board[si + l - 1 - j][sj + i]
+
+    for i in range(L):
+        for j in range(L):
+            tmp[si + i][sj + j] = board[si + L - 1 -j][sj + i]
             if tmp[si + i][sj + j] > 0:
-                tmp[si + i][sj + j] -= 1
-
+                tmp[si +i][sj +j] -= 1
     return tmp
-
 
 def find_square(board, N, ei, ej):
     '''
-    한 명 이상의 참가자와 출구를 무조건 포함하는 가장 작은 정사각형
+    한 명 이상의 참가자와 출구를 포함한 가장 작은 정사각형을 찾습니다.
     '''
     row_len = N
+
     for i in range(N):
         for j in range(N):
             if -11 < board[i][j] < 0:
                 row_len = min(row_len, max(abs(ei - i), abs(ej - j)))
-
     for si in range(N - row_len):
         for sj in range(N - row_len):
             if si <= ei <= si + row_len and sj <= ej <= sj + row_len:
@@ -107,45 +216,53 @@ def find_square(board, N, ei, ej):
                         if -11 < board[i][j] < 0:
                             return si, sj, row_len + 1
 
-
-
 def simulate(N, M, K, board, ei, ej):
-    total_distance = 0
+    '''
+    K초 동안의 과정을 반복하는 함수
+    1초마다 모든 참가자는 한 칸씩 움직인다.
+    모든 참가자가 이동을 끝냈으면, 미로가 회전한다.
+    만약 K초 전에 모든 참가자가 탈출에 성공한다면, 게임이 끝난다.
+    '''
     cnt = M
-
-    for _ in range(K): #  매 초마다
-        # 1. 모든 참가자가 동시에 1칸 움직인다.
+    total_distance = 0
+    
+    for _ in range(K):
+        # 1. 모든 참가자가 동시에 움직인다.
         board, moved, escaped = move_players(N, board, ei, ej)
         total_distance -= moved
-
         cnt -= escaped
 
-        # 만약 K초 전에 모든 참가자가 탈출에 성공한다면 게임이 끝난다.
+        # 2. 만약 K초 전에 모든 참가자가 탈출에 성공한다면, 게임이 끝난다.
         if cnt == 0:
             break
-        
-        # 미로가 회전
+
+        # 3. 회전
         board = rotate(board, N, ei, ej)
-    
+
+        # 4. 회전 후 출구 업데이트
         for i in range(N):
             for j in range(N):
                 if board[i][j] == -11:
-                    ei, ej = i, j # 출구의 위치를 업데이트
-
+                    ei, ej = i, j
+    
     return total_distance, ei + 1, ej + 1
 
+    
 def main():
     N, M, K = map(int, input().split())
 
-    # board에 0은 빈 칸, 1~9는 벽, -1은 사람
+    # 0이라면 빈칸, 1이상 9이하의 값은 벽(내구도)
     board = [list(map(int, input().split())) for _ in range(N)]
 
+    # M개의 줄에 걸쳐서 참가자의 좌표가 주어집니다.
+    # 한 칸에 2명 이상의 참가자가 있을 수 있다.
     for _ in range(M):
         i, j = map(lambda x: int(x) - 1, input().split())
-        board[i][j] -= 1 # 한 칸에 2명 이상의 참가자가 있을 수 있다.
+        board[i][j] -= 1
     
+    # 출구의 좌표가 주어집니다.
     ei, ej = map(lambda x: int(x) - 1, input().split())
-    board[ei][ej] = -11 # 출구
+    board[ei][ej] = -11
 
     total_move, exit_i, exit_j = simulate(N, M, K, board, ei, ej)
 
