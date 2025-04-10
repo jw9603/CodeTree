@@ -157,7 +157,9 @@
 
 def move_players(N, board, ei, ej):
     '''
+    모든 참가자들은 동시에 1칸씩 움직인다.
     (ei, ej) : 출구
+    
     '''
     total_move = 0
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -167,14 +169,14 @@ def move_players(N, board, ei, ej):
     for i in range(N):
         for j in range(N):
             if -11 < board[i][j] < 0:
-                # 이 조건문을 통과했다는 것은 참가자라는 뜻
+                # 이 조건문에 들어왔다는 것은 (i, j)에 참가자가 있다는 것
                 dist = abs(ei - i) + abs(ej - j)
-
+                
                 for di, dj in directions:
                     ni, nj = i + di, j + dj
 
-                    # 한 칸 이동 가능하며, 벽이 없는 곳이어야 한다.
-                    # 움직인 칸(ni, nj)은 현재 머물러 있던 칸보다 출구까지의 최단거리(dist)가 가까워야 한다.
+                    # (ni, nj)에 벽이 없어야 한다.
+                    # (ni, nj)와 (ei, ej)의 거리가 dist보다 작아야 한다.
                     if 0 <= ni < N and 0 <= nj < N and board[ni][nj] <= 0 and dist > abs(ni - ei) + abs(nj - ej):
                         total_move += board[i][j]
                         new_board[i][j] -= board[i][j]
@@ -183,51 +185,43 @@ def move_players(N, board, ei, ej):
                             new_board[ni][nj] += board[i][j]
                         else:
                             escaped += -board[i][j]
+                        
                         break
-
     return new_board, total_move, escaped
 
-def rotate(board, N, ei, ej):
-    si, sj, L = find_square(board, N, ei, ej)
-    tmp = [row[:] for row in board]
-
-    for i in range(L):
-        for j in range(L):
-            tmp[si + i][sj + j] = board[si + L - 1 -j][sj + i]
-            if tmp[si + i][sj + j] > 0:
-                tmp[si +i][sj +j] -= 1
-    return tmp
-
 def find_square(board, N, ei, ej):
-    '''
-    한 명 이상의 참가자와 출구를 포함한 가장 작은 정사각형을 찾습니다.
-    '''
     row_len = N
 
     for i in range(N):
         for j in range(N):
             if -11 < board[i][j] < 0:
                 row_len = min(row_len, max(abs(ei - i), abs(ej - j)))
+    
     for si in range(N - row_len):
         for sj in range(N - row_len):
             if si <= ei <= si + row_len and sj <= ej <= sj + row_len:
                 for i in range(si, si + row_len + 1):
-                    for j in range(sj, sj + row_len + 1):
+                    for j in range(sj , sj + row_len + 1):
                         if -11 < board[i][j] < 0:
                             return si, sj, row_len + 1
+                        
+def rotate(board, N, ei, ej):
+    si, sj, L = find_square(board, N, ei, ej) 
+    tmp = [row[:] for row in board]
+
+    for i in range(L):
+        for j in range(L):
+            tmp[si + i][sj + j] = board[si + L - 1 - j][sj + i]
+            if tmp[si + i][sj + j] > 0:
+                tmp[si + i][sj + j] -= 1
+    
+    return tmp
 
 def simulate(N, M, K, board, ei, ej):
-    '''
-    K초 동안의 과정을 반복하는 함수
-    1초마다 모든 참가자는 한 칸씩 움직인다.
-    모든 참가자가 이동을 끝냈으면, 미로가 회전한다.
-    만약 K초 전에 모든 참가자가 탈출에 성공한다면, 게임이 끝난다.
-    '''
-    cnt = M
     total_distance = 0
-    
+    cnt = M # 만약 K초 전에 모든 참가자가 탈출에 성공한다면, 게임이 끝난다.
     for _ in range(K):
-        # 1. 모든 참가자가 동시에 움직인다.
+        # 1. 모든 참가자들이 움직인다.
         board, moved, escaped = move_players(N, board, ei, ej)
         total_distance -= moved
         cnt -= escaped
@@ -235,8 +229,8 @@ def simulate(N, M, K, board, ei, ej):
         # 2. 만약 K초 전에 모든 참가자가 탈출에 성공한다면, 게임이 끝난다.
         if cnt == 0:
             break
-
-        # 3. 회전
+        
+        # 3. 미로가 회전한다.
         board = rotate(board, N, ei, ej)
 
         # 4. 회전 후 출구 업데이트
@@ -246,26 +240,20 @@ def simulate(N, M, K, board, ei, ej):
                     ei, ej = i, j
     
     return total_distance, ei + 1, ej + 1
-
-    
+        
 def main():
     N, M, K = map(int, input().split())
-
-    # 0이라면 빈칸, 1이상 9이하의 값은 벽(내구도)
     board = [list(map(int, input().split())) for _ in range(N)]
 
-    # M개의 줄에 걸쳐서 참가자의 좌표가 주어집니다.
-    # 한 칸에 2명 이상의 참가자가 있을 수 있다.
     for _ in range(M):
         i, j = map(lambda x: int(x) - 1, input().split())
         board[i][j] -= 1
     
-    # 출구의 좌표가 주어집니다.
+    # 출구
     ei, ej = map(lambda x: int(x) - 1, input().split())
     board[ei][ej] = -11
 
     total_move, exit_i, exit_j = simulate(N, M, K, board, ei, ej)
-
     print(total_move)
     print(exit_i, exit_j)
 
