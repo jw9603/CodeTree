@@ -221,7 +221,6 @@ def bfs(N, M, board, si, sj, ei, ej):
         # 레이저가 공격 대상에게 도착했다면? 그 경로들의 포탑들에게도 데미지를 줘야한다.
         if (ci, cj) == (ei, ej):
             board[ei][ej] = max(0, board[ei][ej] - attack_power)
-            fight_set.add((ei, ej))
             while True:
                 ci, cj = visited[ci][cj]
                 if (ci, cj) == (si, sj):
@@ -236,6 +235,7 @@ def bfs(N, M, board, si, sj, ei, ej):
                 visited[ni][nj] = (ci, cj)
     
     return False
+
 def bomb(N, M, board, si, sj, ei, ej):
     global fight_set
 
@@ -291,12 +291,12 @@ def simulate(N, M, K, board, attack_turn):
         
         # 5. 포탑 정비
         for i in range(N):
-            for j in range(N):
+            for j in range(M):
                 if board[i][j] > 0 and (i, j) not in fight_set:
                     board[i][j] += 1
 
         # 남아 있는 포탑의 수 확인
-        cnt = sum(1 for i in range(N) for j in range(N) if board[i][j] > 0)
+        cnt = sum(1 for i in range(N) for j in range(M) if board[i][j] > 0)
         if cnt <= 1:
             break
 
