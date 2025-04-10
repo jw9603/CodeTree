@@ -118,6 +118,8 @@ def simulate(N, M, K, board, ei, ej):
         board, moved, escaped = move_players(N, board, ei, ej)
         total_distance -= moved
 
+        cnt -= escaped
+
         # 만약 K초 전에 모든 참가자가 탈출에 성공한다면 게임이 끝난다.
         if cnt == 0:
             break
