@@ -171,9 +171,7 @@ def simulate(N, M, K, board, attack_turn):
                     board[i][j] += 1
 
         # 생존한 포탑 수 확인: 부서지지 않은 포탑이 1개가 된다면 그 즉시 중지
-        cnt = N * M
-        for row in board:
-            cnt -= row.count(0)
+        cnt = sum(1 for i in range(N) for j in range(M) if board[i][j] > 0)
         if cnt <= 1:
             break
 
