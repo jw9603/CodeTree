@@ -138,7 +138,7 @@ def simulate(N, M, K, board, attack_turn):
                 if board[i][j] <= 0:
                     continue
                 
-                if min_power > board[i][j] or (min_power == board[i][j] and max_turn < attack_turn[i][j]) or (min_power == board[i][j] and max_turn == attack_turn[i][j] and si +sj < i + j) or (min_power == board[i][j] and max_turn < attack_turn[i][j] and si + sj == i + j and sj < j):
+                if min_power > board[i][j] or (min_power == board[i][j] and max_turn < attack_turn[i][j]) or (min_power == board[i][j] and max_turn == attack_turn[i][j] and si +sj < i + j) or (min_power == board[i][j] and max_turn == attack_turn[i][j] and si + sj == i + j and sj < j):
                     min_power, max_turn, si, sj = board[i][j], attack_turn[i][j], i, j
         
         # 2. 공격을 받는 대상자 선정: 공격력이 가장 강한 포탑을 공격
