@@ -84,7 +84,7 @@ def bfs(N, M, board, si, sj, ei, ej):
     우 하 좌 상의 우선순위
     '''
     queue = deque([(si, sj)])
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    directions1 = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     visited = [[[] for _ in range(M)] for _ in range(N)]
     visited[si][sj] = (si, sj)
     attack_power = board[si][sj]
@@ -102,7 +102,7 @@ def bfs(N, M, board, si, sj, ei, ej):
                 board[ci][cj] = max(0, board[ci][cj] - attack_power // 2)
                 fight_set.add((ci, cj))
         
-        for di, dj in directions:
+        for di, dj in directions1:
             ni, nj = (ci + di) % N, (cj + dj) % M
             if not visited[ni][nj] and board[ni][nj] > 0:
                 queue.append((ni, nj))
@@ -119,10 +119,10 @@ def bomb(N, M, board, si, sj, ei, ej):
     만약 가장자리에 포탄이 떨어졌다면, 포탄의 추가 피해가 반대편 격자에 미치게 된다.
     '''
     attack_power = board[si][sj]
-    board[ei][ej] = max(0, board[ei][ej] - attack_power) # 공격을 받는 놈 데미지 계산
-    directions = [(-1, -1), (-1, 1), (1, -1), (1, 1), (0, -1), (0, 1), (-1, 0), (1, 0)]
+    board[ei][ej] = max(0, board[ei][ej] - attack_power)
+    directions2 = [(-1, -1), (-1, 1), (1, -1), (1, 1), (0, -1), (0, 1), (-1, 0), (1, 0)]
 
-    for di, dj in directions:
+    for di, dj in directions2:
         ni, nj = (ei + di) % N, (ej + dj) % M
         if (ni, nj) != (si, sj):
             board[ni][nj] = max(0, board[ni][nj] - attack_power // 2)
@@ -172,10 +172,8 @@ def simulate(N, M, K, board, attack_turn):
 
         # 생존한 포탑 수 확인: 부서지지 않은 포탑이 1개가 된다면 그 즉시 중지
         cnt = N * M
-        for i in range(N):
-            for j in range(M):
-                if board[i][j] <= 0:
-                    cnt += 1
+        for row in board:
+            cnt -= row.count(0)
         if cnt <= 1:
             break
 
