@@ -54,7 +54,7 @@ def simulate(N, M, H, K, runners, trees):
     tdj = [0, 1, 0, -1]
 
     # 술래의 초기 위치
-    ti, tj, td = (N - 1) // 2, (N - 1) // 2, 0
+    ti, tj, td = N // 2, N // 2, 0
 
     # 달팽이 코드 초기 변수들
     max_cnt = 1 # 현재 방향으로 이동할 최대 횟수 (달팽이 꺾을 타이밍 결정)
@@ -92,7 +92,7 @@ def simulate(N, M, H, K, runners, trees):
             max_cnt, cnt, flag, val = N, 1, 1, -1
             td = 2
         
-        elif (ti, tj) == ((N - 1) // 2, (N - 1) // 2): # 바깥 달팽이 종료
+        elif (ti, tj) == (N // 2, N // 2): # 바깥 달팽이 종료
             max_cnt, cnt, flag, val = 1, 0, 0, 1
             td = 0
 
