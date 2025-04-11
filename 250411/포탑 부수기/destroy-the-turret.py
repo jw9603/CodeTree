@@ -512,7 +512,7 @@ def simulate(N, M, K, board, attack_turn):
                     board[i][j] += 1
 
         # 4. 종료 조건
-        cnt = sum(1 for i in range(N) for j in range(N) if board[i][j] > 0)
+        cnt = sum(1 for i in range(N) for j in range(M) if board[i][j] > 0)
         if cnt <= 1:
             break
 
