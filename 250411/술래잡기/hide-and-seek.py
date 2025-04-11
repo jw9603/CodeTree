@@ -81,7 +81,7 @@ def simulate(N, M, H, K, runners, trees):
                     # 이후 바라보고 있는 방향으로 1칸 움직인다. 해당 위치에 술래가 없다면
                     ni, nj = runners[i][0] + di[runners[i][2]], runners[i][1] + dj[runners[i][2]]
 
-                    if 0 <= ni < N and 0 <= nj < N and (ni, nj) != (ti, tj):
+                    if (ni, nj) != (ti, tj):
                         runners[i][0], runners[i][1] = ni, nj
 
         # 2. 술래 이동: 달팽이 이동
