@@ -40,110 +40,198 @@
 
 
 ###################################### 알고리즘 ######################################
-def simulate(N, M, H, K, runners, trees):
+# def simulate(N, M, H, K, runners, trees):
 
+#     # 좌, 우, 하, 상
+#     di = [0, 0, 1, -1]
+#     dj = [-1, 1, 0, 0]
+
+#     # 반대 방향
+#     opp = {0: 1, 1: 0, 2: 3, 3: 2}
+    
+#     # 술래의 방향: 상, 우, 하, 좌
+#     tdi = [-1, 0, 1, 0]
+#     tdj = [0, 1, 0, -1]
+
+#     # 술래의 초기 위치
+#     ti, tj, td = N // 2, N // 2, 0
+
+#     # 달팽이 코드 초기 변수들
+#     max_cnt = 1 # 현재 방향으로 이동할 최대 횟수 (달팽이 꺾을 타이밍 결정)
+#     cnt = 0     # 현재 방향으로 이동한 횟수
+#     flag = 0    # 방향 전환 시 한 번은 유지하고, 두 번째에서 max_cnt 증가시킴
+#     val = 1     # 방향 회전의 진행 방향 (1이면 시계 방향, -1이면 반시계 방향)
+
+#     ans = 0
+#     # K턴의 게임 진행
+#     for k in range(1, K + 1):
+#         # 1. 도망자들의 이동
+#         for i in range(len(runners)):
+#             # 1.1 도망자가 움직일 때 현재 술래와의 거리가 3이하인 도망자만 움직인다.
+#             if abs(runners[i][0] - ti) + abs(runners[i][1] - tj) <= 3:
+#                 ni, nj = runners[i][0] + di[runners[i][2]], runners[i][1] + dj[runners[i][2]]
+
+#                 # 1.1.1 움직이려는 칸에 술래가 있지 않다면 해당 칸으로 이동한다. 해당 칸에 나무가 있어도 괜찮다.
+#                 if 0 <= ni < N and 0 <= nj < N and (ni, nj) != (ti, tj):
+#                     runners[i][0], runners[i][1] = ni, nj
+
+#                 else: # 1.2 현재 바라보고 잇는 방향으로 1칸 움직인다 했을 때 격자를 벗어나는 경우
+#                     runners[i][2] = opp[runners[i][2]]
+
+#                     # 이후 바라보고 있는 방향으로 1칸 움직인다. 해당 위치에 술래가 없다면
+#                     ni, nj = runners[i][0] + di[runners[i][2]], runners[i][1] + dj[runners[i][2]]
+
+#                     if (ni, nj) != (ti, tj):
+#                         runners[i][0], runners[i][1] = ni, nj
+
+#         # 2. 술래 이동: 달팽이 이동
+#         cnt += 1
+#         ti, tj = ti + tdi[td], tj + tdj[td]
+
+#         if (ti, tj) == (0, 0): # 안쪽 달팽이 종료
+#             max_cnt, cnt, flag, val = N, 1, 1, -1
+#             td = 2
+        
+#         elif (ti, tj) == (N // 2, N // 2): # 바깥 달팽이 종료
+#             max_cnt, cnt, flag, val = 1, 0, 0, 1
+#             td = 0
+
+#         # 평소에는 cnt를 증가시키며 max_cnt와 비교
+#         else:
+#             if cnt == max_cnt: # 방향 꺾는 시점
+#                 cnt = 0
+#                 td = (td + val) % 4 # 방향 회전 (val로 시계/반시계 결정)
+#                 if flag == 0:
+#                     flag = 1
+#                 else:
+#                     flag = 0
+#                     max_cnt += val  # 두 번에 한 번만 max_cnt 증가
+        
+
+
+#         # 3. 도망자 잡기: 술래자리 포함 3칸
+#         tset = set(((ti, tj), (ti + tdi[td], tj + tdj[td]), (ti + tdi[td] * 2, tj + tdj[td] * 2)))
+        
+#         for i in range(len(runners) - 1, -1, -1):
+#             rx, ry = runners[i][0], runners[i][1]
+#             if (rx, ry) in tset and (rx, ry) not in trees:
+#                 runners.pop(i)
+#                 ans += k
+        
+#         # 도망자가 없다면 더이상 점수도 없음
+#         if not runners:
+#             break
+    
+#     return ans
+
+
+# def main():
+#     N, M, H, K = map(int, input().split())
+
+#     # m개의 줄에 걸쳐 도망자의 위치 (x, y)와 이동 방법 d가 주어진다.
+#     runners = []
+#     for _ in range(M):
+#         i, j, d = map(int, input().split()) # d:1 좌우, d:2상하
+#         runners.append([i - 1, j - 1, d])
+    
+#     # h개의 줄에 걸쳐 나무의 위치 (x, y), 나무는 이동하지도 않고 겹치지도 않기 때문에 집합으로 두자
+#     trees = set()
+#     for _ in range(H):
+#         x, y = map(lambda x: int(x) - 1, input().split())
+#         trees.add((x, y))
+
+#     print(simulate(N, M, H, K, runners, trees))
+
+# if __name__ == '__main__':
+#     main()
+
+
+
+def simulate(N, M, H, K, runners, trees):
     # 좌, 우, 하, 상
     di = [0, 0, 1, -1]
     dj = [-1, 1, 0, 0]
-
-    # 반대 방향
     opp = {0: 1, 1: 0, 2: 3, 3: 2}
-    
-    # 술래의 방향: 상, 우, 하, 좌
+
+    # 술래 방향: 상, 우, 하, 좌
     tdi = [-1, 0, 1, 0]
     tdj = [0, 1, 0, -1]
 
-    # 술래의 초기 위치
-    ti, tj, td = N // 2, N // 2, 0
+    ti, tj, td = N // 2, N // 2, 0  # 술래 시작 위치 (0-indexed 중심)
 
-    # 달팽이 코드 초기 변수들
-    max_cnt = 1 # 현재 방향으로 이동할 최대 횟수 (달팽이 꺾을 타이밍 결정)
-    cnt = 0     # 현재 방향으로 이동한 횟수
-    flag = 0    # 방향 전환 시 한 번은 유지하고, 두 번째에서 max_cnt 증가시킴
-    val = 1     # 방향 회전의 진행 방향 (1이면 시계 방향, -1이면 반시계 방향)
-
+    max_cnt, cnt, flag, val = 1, 0, 0, 1  # 달팽이 이동
     ans = 0
-    # K턴의 게임 진행
+
     for k in range(1, K + 1):
-        # 1. 도망자들의 이동
+        # 1. 도망자 이동
         for i in range(len(runners)):
-            # 1.1 도망자가 움직일 때 현재 술래와의 거리가 3이하인 도망자만 움직인다.
-            if abs(runners[i][0] - ti) + abs(runners[i][1] - tj) <= 3:
-                ni, nj = runners[i][0] + di[runners[i][2]], runners[i][1] + dj[runners[i][2]]
+            x, y, d = runners[i]
+            if abs(x - ti) + abs(y - tj) <= 3:
+                nx, ny = x + di[d], y + dj[d]
+                if 0 <= nx < N and 0 <= ny < N and (nx, ny) != (ti, tj):
+                    runners[i][0], runners[i][1] = nx, ny
+                else:
+                    d = opp[d]
+                    nx, ny = x + di[d], y + dj[d]
+                    if 0 <= nx < N and 0 <= ny < N and (nx, ny) != (ti, tj):
+                        runners[i][0], runners[i][1], runners[i][2] = nx, ny, d
+                    else:
+                        runners[i][2] = d  # 방향만 바꾸고 이동 못함
 
-                # 1.1.1 움직이려는 칸에 술래가 있지 않다면 해당 칸으로 이동한다. 해당 칸에 나무가 있어도 괜찮다.
-                if 0 <= ni < N and 0 <= nj < N and (ni, nj) != (ti, tj):
-                    runners[i][0], runners[i][1] = ni, nj
-
-                else: # 1.2 현재 바라보고 잇는 방향으로 1칸 움직인다 했을 때 격자를 벗어나는 경우
-                    runners[i][2] = opp[runners[i][2]]
-
-                    # 이후 바라보고 있는 방향으로 1칸 움직인다. 해당 위치에 술래가 없다면
-                    ni, nj = runners[i][0] + di[runners[i][2]], runners[i][1] + dj[runners[i][2]]
-
-                    if (ni, nj) != (ti, tj):
-                        runners[i][0], runners[i][1] = ni, nj
-
-        # 2. 술래 이동: 달팽이 이동
+        # 2. 술래 이동
         cnt += 1
         ti, tj = ti + tdi[td], tj + tdj[td]
 
-        if (ti, tj) == (0, 0): # 안쪽 달팽이 종료
+        if (ti, tj) == (0, 0):  # 가장 안쪽 도달
             max_cnt, cnt, flag, val = N, 1, 1, -1
             td = 2
-        
-        elif (ti, tj) == (N // 2, N // 2): # 바깥 달팽이 종료
+        elif (ti, tj) == (N // 2, N // 2):  # 중앙 도달
             max_cnt, cnt, flag, val = 1, 0, 0, 1
             td = 0
+        elif cnt == max_cnt:
+            cnt = 0
+            td = (td + val) % 4
+            if flag == 0:
+                flag = 1
+            else:
+                flag = 0
+                max_cnt += val
 
-        # 평소에는 cnt를 증가시키며 max_cnt와 비교
-        else:
-            if cnt == max_cnt: # 방향 꺾는 시점
-                cnt = 0
-                td = (td + val) % 4 # 방향 회전 (val로 시계/반시계 결정)
-                if flag == 0:
-                    flag = 1
-                else:
-                    flag = 0
-                    max_cnt += val  # 두 번에 한 번만 max_cnt 증가
-        
+        # 3. 도망자 잡기 (술래 자리 포함 3칸, 나무 제외)
+        tset = set()
+        for dist in range(3):
+            ni, nj = ti + tdi[td] * dist, tj + tdj[td] * dist
+            if 0 <= ni < N and 0 <= nj < N:
+                tset.add((ni, nj))
 
-
-        # 3. 도망자 잡기: 술래자리 포함 3칸
-        tset = set(((ti, tj), (ti + tdi[td], tj + tdj[td]), (ti + tdi[td] * 2, tj + tdj[td] * 2)))
-        
         for i in range(len(runners) - 1, -1, -1):
             rx, ry = runners[i][0], runners[i][1]
             if (rx, ry) in tset and (rx, ry) not in trees:
                 runners.pop(i)
                 ans += k
-        
-        # 도망자가 없다면 더이상 점수도 없음
+
         if not runners:
             break
-    
+
     return ans
 
 
 def main():
     N, M, H, K = map(int, input().split())
 
-    # m개의 줄에 걸쳐 도망자의 위치 (x, y)와 이동 방법 d가 주어진다.
     runners = []
     for _ in range(M):
-        i, j, d = map(int, input().split()) # d:1 좌우, d:2상하
-        runners.append([i - 1, j - 1, d])
-    
-    # h개의 줄에 걸쳐 나무의 위치 (x, y), 나무는 이동하지도 않고 겹치지도 않기 때문에 집합으로 두자
+        x, y, d = map(int, input().split())  # d: 1(좌우), 2(상하)
+        # d = 0 if d == 1 else 2  # 좌우→0, 상하→2 (0-index 기준으로 상/하 방향만 구분)
+        runners.append([x - 1, y - 1, d])
+
     trees = set()
     for _ in range(H):
-        x, y = map(lambda x: int(x) - 1, input().split())
-        trees.add((x, y))
+        x, y = map(int, input().split())
+        trees.add((x - 1, y - 1))
 
     print(simulate(N, M, H, K, runners, trees))
 
+
 if __name__ == '__main__':
     main()
-
-
-
