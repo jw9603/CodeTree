@@ -110,11 +110,7 @@ def simulate(N, M, H, K, runners, trees):
 
 
         # 3. 도망자 잡기: 술래자리 포함 3칸
-        tset = set()
-        for dist in range(3):
-            ni, nj = ti + tdi[td] * dist, tj + tdj[td] * dist
-            if 0 <= ni < N and 0 <= nj < N:
-                tset.add((ni, nj))
+        tset = set(((ti, tj), (ti + tdi[td], tj + tdj[td]), (ti + tdi[td] * 2, tj + tdj[td] * 2)))
         
         for i in range(len(runners) - 1, -1, -1):
             rx, ry = runners[i][0], runners[i][1]
