@@ -147,70 +147,59 @@
 
 
 
-def simulate(N, M, H, K, runners, trees):
-    # 좌, 우, 하, 상
-    di = [0, 0, 1, -1]
-    dj = [-1, 1, 0, 0]
+def simulate(N, M, H, K, arr, tree):
+    # 방향 정의
+    di, dj = [0, 0, 1, -1], [-1, 1, 0, 0]  # 도망자 이동
+    tdi, tdj = [-1, 0, 1, 0], [0, 1, 0, -1]  # 술래 달팽이 방향
     opp = {0: 1, 1: 0, 2: 3, 3: 2}
 
-    # 술래 방향: 상, 우, 하, 좌
-    tdi = [-1, 0, 1, 0]
-    tdj = [0, 1, 0, -1]
-
-    ti, tj, td = N // 2, N // 2, 0  # 술래 시작 위치 (0-indexed 중심)
-
-    max_cnt, cnt, flag, val = 1, 0, 0, 1  # 달팽이 이동
+    mid = (N + 1) // 2
+    ti, tj, td = mid, mid, 0  # 술래 시작 위치 및 방향
+    mx_cnt, cnt, flag, val = 1, 0, 0, 1  # 달팽이 회전 변수
     ans = 0
 
     for k in range(1, K + 1):
         # 1. 도망자 이동
-        for i in range(len(runners)):
-            x, y, d = runners[i]
-            if abs(x - ti) + abs(y - tj) <= 3:
-                nx, ny = x + di[d], y + dj[d]
-                if 0 <= nx < N and 0 <= ny < N and (nx, ny) != (ti, tj):
-                    runners[i][0], runners[i][1] = nx, ny
+        for i in range(len(arr)):
+            if abs(arr[i][0] - ti) + abs(arr[i][1] - tj) <= 3:
+                ni, nj = arr[i][0] + di[arr[i][2]], arr[i][1] + dj[arr[i][2]]
+                if 1 <= ni <= N and 1 <= nj <= N and (ni, nj) != (ti, tj):
+                    arr[i][0], arr[i][1] = ni, nj
                 else:
-                    d = opp[d]
-                    nx, ny = x + di[d], y + dj[d]
-                    if 0 <= nx < N and 0 <= ny < N and (nx, ny) != (ti, tj):
-                        runners[i][0], runners[i][1], runners[i][2] = nx, ny, d
-                    else:
-                        runners[i][2] = d  # 방향만 바꾸고 이동 못함
+                    arr[i][2] = opp[arr[i][2]]
+                    ni, nj = arr[i][0] + di[arr[i][2]], arr[i][1] + dj[arr[i][2]]
+                    if 1 <= ni <= N and 1 <= nj <= N and (ni, nj) != (ti, tj):
+                        arr[i][0], arr[i][1] = ni, nj
 
         # 2. 술래 이동
         cnt += 1
         ti, tj = ti + tdi[td], tj + tdj[td]
-
-        if (ti, tj) == (0, 0):  # 가장 안쪽 도달
-            max_cnt, cnt, flag, val = N, 1, 1, -1
+        if (ti, tj) == (1, 1):
+            mx_cnt, cnt, flag, val = N, 1, 1, -1
             td = 2
-        elif (ti, tj) == (N // 2, N // 2):  # 중앙 도달
-            max_cnt, cnt, flag, val = 1, 0, 0, 1
+        elif (ti, tj) == (mid, mid):
+            mx_cnt, cnt, flag, val = 1, 0, 0, 1
             td = 0
-        elif cnt == max_cnt:
+        elif cnt == mx_cnt:
             cnt = 0
             td = (td + val) % 4
+            flag = 1 - flag
             if flag == 0:
-                flag = 1
-            else:
-                flag = 0
-                max_cnt += val
+                mx_cnt += val
 
-        # 3. 도망자 잡기 (술래 자리 포함 3칸, 나무 제외)
+        # 3. 도망자 잡기
         tset = set()
-        for dist in range(3):
-            ni, nj = ti + tdi[td] * dist, tj + tdj[td] * dist
-            if 0 <= ni < N and 0 <= nj < N:
+        for d in range(3):
+            ni, nj = ti + tdi[td] * d, tj + tdj[td] * d
+            if 1 <= ni <= N and 1 <= nj <= N:
                 tset.add((ni, nj))
 
-        for i in range(len(runners) - 1, -1, -1):
-            rx, ry = runners[i][0], runners[i][1]
-            if (rx, ry) in tset and (rx, ry) not in trees:
-                runners.pop(i)
+        for i in range(len(arr) - 1, -1, -1):
+            if (arr[i][0], arr[i][1]) in tset and (arr[i][0], arr[i][1]) not in tree:
+                arr.pop(i)
                 ans += k
 
-        if not runners:
+        if not arr:
             break
 
     return ans
@@ -219,18 +208,19 @@ def simulate(N, M, H, K, runners, trees):
 def main():
     N, M, H, K = map(int, input().split())
 
-    runners = []
+    # 도망자 정보: (x, y, d)
+    arr = []
     for _ in range(M):
-        x, y, d = map(int, input().split())  # d: 1(좌우), 2(상하)
-        # d = 0 if d == 1 else 2  # 좌우→0, 상하→2 (0-index 기준으로 상/하 방향만 구분)
-        runners.append([x - 1, y - 1, d])
+        x, y, d = map(int, input().split())
+        arr.append([x, y, d])  # d: 0(좌), 1(우), 2(하), 3(상)
 
-    trees = set()
+    # 나무 좌표 집합
+    tree = set()
     for _ in range(H):
-        x, y = map(int, input().split())
-        trees.add((x - 1, y - 1))
+        i, j = map(int, input().split())
+        tree.add((i, j))
 
-    print(simulate(N, M, H, K, runners, trees))
+    print(simulate(N, M, H, K, arr, tree))
 
 
 if __name__ == '__main__':
