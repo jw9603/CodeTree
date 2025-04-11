@@ -149,32 +149,129 @@
 # if __name__ == '__main__':
 #     main()
 
+# from collections import deque, defaultdict
+# def push_knight(start, dr, info, board, N):
+#     # 상, 우, 하, 좌
+#     di = [-1, 0, 1, 0]
+#     dj = [0, 1, 0, -1]
+#     queue = deque([start])
+
+#     # 데미지 계산
+#     # 마지막 줄에서 데미지를 받은 만큼 info 자료에 업데이트하기 위해 필요한 자료형
+#     damage = [0] * (N + 1)
+
+#     # 밀리는 것들
+#     pushed_set = set([start])
+
+#     while queue:
+#         cur = queue.popleft()
+#         ci, cj, h, w, k = info[cur]
+
+#         # 한 칸 이동
+#         ni, nj = ci + di[dr], cj + dj[dr]
+
+#         # 이동 반경에 벽이나 함정이 있는지 확인
+#         # 벽일경우 바로 스탑, 함정이 있다면 함정 개수만큼 데미지 계산
+#         for i in range(ni, ni + h):
+#             for j in range(nj, nj + w):
+#                 if board[i][j] == 2:
+#                     return
+#                 if board[i][j] == 1:
+#                     damage[cur] += 1
+        
+#         for idx in info:
+#             if idx in pushed_set:
+#                 continue
+                
+#             ti, tj, th, tw, _ = info[idx]
+
+#             # 이동한 기사의 영역과 다른 기사 영역이 사각형으로 겹치는지
+#             # 이동한 기사의 세로: [ni, ni + h - 1]
+#             # 이동한 기사의 가로: [nj, nj + w - 1]
+#             if ni <= ti + th - 1 and ni + h - 1 >= ti and tj <= nj + w - 1 and tj + tw - 1 >= nj:
+#                 queue.append(idx)
+#                 pushed_set.add(idx)
+    
+#     damage[start] = 0
+
+#     # 다 밀렸으니 이제 계산
+#     for idx in pushed_set:
+#        si, sj, h, w, k = info[idx]
+
+#        if k <= damage[idx]:
+#            info.pop(idx)
+#        else:
+#            ni, nj = si + di[dr], sj + dj[dr]
+#            info[idx] = [ni, nj, h, w, k - damage[idx]]
+
+# def simulate(L, N, Q, board, init_k, info, command):
+#     total_damage = 0
+
+#     for idx, dr in command:
+#         # 예외 조건2: 체스판에서 사라진 기사에게 명령을 내리면 아무런 반응이 없게 된다.
+#         if idx in info:
+#             push_knight(idx, dr, info, board, N)
+    
+
+#     for idx in info:
+#         total_damage += init_k[idx] - info[idx][4]
+    
+#     return total_damage
+
+# def main():
+#     L, N, Q = map(int, input().split())
+
+#     # 체스판 밖도 벽으로 간주한다. -> 아! 가장자리에 벽도 만들어야 겠구나!
+#     # 0: 빈 칸, 1: 함정, 2: 벽
+#     board = [[2] * (L + 2)]
+#     for _ in range(L):
+#         row = list(map(int, input().split()))
+#         board.append([2] + row + [2])
+#     board.append([2] * (L + 2))
+
+#     # 기사들은 맞짱을 다 까고, 밀린 이후에 대미지를 계산해야 한다.
+#     # 그렇다는 것은 남은 데미지 == 초기 체력 - 맞짱 데미지
+#     init_k = [0] * (N + 1)
+
+#     # 다음 N 개의 줄에 걸쳐서 초기 기사들의 정보가 주어진다.
+#     # 이것도 각 기사들마다의 정보를 저장하기 위해 defaultdict(list)
+#     info = defaultdict(list)
+#     for n in range(1, N + 1):
+#         r, c, h, w, k = map(int, input().split())
+#         info[n] = [r, c, h, w, k]
+#         init_k[n] = k
+    
+#     # Q 개의 줄에 걸쳐 왕의 명령 (i, d)
+#     commands = [tuple(map(int, input().split())) for _ in range(Q)]
+
+#     print(simulate(L, N, Q, board, init_k, info, commands))
+
+# if __name__ == '__main__':
+#     main()
 from collections import deque, defaultdict
-def push_knight(start, dr, info, board, N):
+
+# 1. 기사 이동
+def push_knight(start, dr, board, info, init_k, N):
+    '''
+    왕에게 명령을 받은 기사는 상하좌우 중 하나로 한 칸 이동할 수 있다.
+    '''
     # 상, 우, 하, 좌
     di = [-1, 0, 1, 0]
     dj = [0, 1, 0, -1]
     queue = deque([start])
 
-    # 데미지 계산
-    # 마지막 줄에서 데미지를 받은 만큼 info 자료에 업데이트하기 위해 필요한 자료형
     damage = [0] * (N + 1)
-
-    # 밀리는 것들
     pushed_set = set([start])
 
     while queue:
         cur = queue.popleft()
         ci, cj, h, w, k = info[cur]
 
-        # 한 칸 이동
         ni, nj = ci + di[dr], cj + dj[dr]
 
-        # 이동 반경에 벽이나 함정이 있는지 확인
-        # 벽일경우 바로 스탑, 함정이 있다면 함정 개수만큼 데미지 계산
         for i in range(ni, ni + h):
             for j in range(nj, nj + w):
-                if board[i][j] == 2:
+                if board[i][j] == 2: 
                     return
                 if board[i][j] == 1:
                     damage[cur] += 1
@@ -182,41 +279,37 @@ def push_knight(start, dr, info, board, N):
         for idx in info:
             if idx in pushed_set:
                 continue
-                
             ti, tj, th, tw, _ = info[idx]
 
-            # 이동한 기사의 영역과 다른 기사 영역이 사각형으로 겹치는지
-            # 이동한 기사의 세로: [ni, ni + h - 1]
-            # 이동한 기사의 가로: [nj, nj + w - 1]
-            if ni <= ti + th - 1 and ni + h - 1 >= ti and tj <= nj + w - 1 and tj + tw - 1 >= nj:
+            if ni <= ti + th - 1 and ni + h - 1 >= ti and tj <= nj + w - 1 and nj <= tj + tw - 1:
                 queue.append(idx)
                 pushed_set.add(idx)
     
     damage[start] = 0
-
-    # 다 밀렸으니 이제 계산
     for idx in pushed_set:
-       si, sj, h, w, k = info[idx]
-
-       if k <= damage[idx]:
-           info.pop(idx)
-       else:
-           ni, nj = si + di[dr], sj + dj[dr]
-           info[idx] = [ni, nj, h, w, k - damage[idx]]
-
-def simulate(L, N, Q, board, init_k, info, command):
+        si, sj, h, w, k = info[idx]
+        if k <= damage[idx]:
+            info.pop(idx)
+        else:
+            ni, nj = si + di[dr], sj + dj[dr]
+            info[idx] = [ni, nj, h, w, k - damage[idx]]
+# 2. 대결 데미지
+def simulate(L, N, Q, board, init_k, info, commands):
     total_damage = 0
 
-    for idx, dr in command:
-        # 예외 조건2: 체스판에서 사라진 기사에게 명령을 내리면 아무런 반응이 없게 된다.
+    # 1. 기사 이동
+    for idx, dr in commands:
+        # 왕에게 명령을 받은 기사는 이동
         if idx in info:
-            push_knight(idx, dr, info, board, N)
+            push_knight(idx, dr, board, info, init_k, N)
     
-
+    # 2. 대결 데미지
     for idx in info:
+        # 초기 체력 - 현재 체력 == 받은 데미지
         total_damage += init_k[idx] - info[idx][4]
     
     return total_damage
+
 
 def main():
     L, N, Q = map(int, input().split())
