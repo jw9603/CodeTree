@@ -188,7 +188,7 @@ def push_knight(start, dr, info, board, N):
             # 이동한 기사의 영역과 다른 기사 영역이 사각형으로 겹치는지
             # 이동한 기사의 세로: [ni, ni + h - 1]
             # 이동한 기사의 가로: [nj, nj + w - 1]
-            if ni <= ti + th - 1 and ni + h - 1 >= ti and nj <= tj + tw - 1 and tj + tw - 1 >= nj:
+            if ni <= ti + th - 1 and ni + h - 1 >= ti and tj <= nj + w - 1 and tj + tw - 1 >= nj:
                 queue.append(idx)
                 pushed_set.add(idx)
     
