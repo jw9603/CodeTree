@@ -216,6 +216,116 @@
 
 # 2.1 유물 1차 획득
 #
+# def rotate(grid, i, j):
+#     new_grid = [row[:] for row in grid]
+
+#     for x in range(3):
+#         for y in range(3):
+#             new_grid[i + x][j + y] = grid[i + 3 - y - 1][j + x]
+    
+#     return new_grid
+
+# def bfs(grid, visited, i, j, flag):
+#     cnt = 0
+#     queue = deque([(i, j)])
+#     visited[i][j] = True
+#     connected = set()
+#     connected.add((i, j))
+
+#     value = grid[i][j]
+#     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+#     while queue:
+#         r, c = queue.popleft()
+#         for dr, dc in directions:
+#             nr, nc = r + dr, c + dc
+#             if 0 <= nr < 5 and 0 <= nc < 5 and not visited[nr][nc] and grid[nr][nc] == value:
+#                 visited[nr][nc] = True
+#                 queue.append((nr, nc))
+#                 connected.add((nr, nc))
+    
+#     if len(connected) >= 3:
+#         if flag == 1:
+#             for i, j in connected:
+#                 grid[i][j] = 0
+#         return len(connected)
+#     else:
+#         return 0
+
+# def count_and_remove(grid, flag):
+#     '''
+#     같은 종류의 유물 조각이 3개 이상이 연결된 경우를 찾아 제거하고, 제거된 조각의 수를 반환
+#     조각의 수는 유물의 가치
+#     '''
+#     visited = [[False] * 5 for _ in range(5)]
+#     total = 0
+
+#     for i in range(5):
+#         for j in range(5):
+#             if not visited[i][j] and grid[i][j] != 0:
+#                 total += bfs(grid, visited, i, j, flag)
+    
+#     return total
+
+# from collections import deque
+# def simulate(grid, walls, K):
+#     results = []
+#     # K턴을 진행 ()
+#     # 아직 K번의 턴을 진행하지 못했지만, 탐사 진행 과정에서 어떠한 방법을
+#     # 사용하더라도 유물을 획득할 수 없었다면 모든 탐사는 그 즉시 종료.
+#     for _ in range(K):
+#         best = (-1, 0, 0, 0, []) # 유물 수, 회전 횟수, 열, 행, 회전 결과
+#         for rot in range(1, 4):
+#             for j in range(3):
+#                 for i in range(3):
+#                     temp = [row[:] for row in grid]
+
+#                     for _ in range(rot):
+#                         temp = rotate(temp, i, j)
+                    
+#                     cnt = count_and_remove(temp, 0)
+
+#                     if cnt > best[0] or (cnt == best[0] and (rot, j, i) < (best[1], best[2], best[3])):
+#                         best = (cnt, rot, j, i, temp)
+
+        
+#         if best[0] == 0:
+#             break
+
+#         # 2. 유물 연쇠 획득
+#         grid = [row[:] for row in best[4]]
+#         total_gain = 0
+
+#         while True:
+#             cnt = count_and_remove(grid, 1)
+#             if cnt == 0:
+#                 break
+
+#             total_gain += cnt
+
+#             for j in range(5):
+#                 for i in range(4, -1, -1):
+#                     if grid[i][j] == 0 and walls:
+#                         grid[i][j] = walls.popleft()
+            
+#         results.append(total_gain)
+    
+#     print(*results)
+
+
+
+
+# def main():
+#     K, M = map(int, input().split())
+#     grid = [list(map(int, input().split())) for _ in range(5)]
+
+#     walls = deque(map(int, input().split()))
+    
+#     simulate(grid, walls, K)
+
+# if __name__ == '__main__':
+#     main()
+from collections import deque
 def rotate(grid, i, j):
     new_grid = [row[:] for row in grid]
 
@@ -225,24 +335,35 @@ def rotate(grid, i, j):
     
     return new_grid
 
-def bfs(grid, visited, i, j, flag):
-    cnt = 0
+def count(grid, flag):
+
+    visited = [[False] * 5 for _ in range(5)]
+    total = 0
+
+    for i in range(5):
+        for j in range(5):
+            if not visited[i][j] and grid[i][j] != 0:
+                total += bfs(grid, i, j, flag, visited)
+
+    return total
+
+def bfs(grid, i, j, flag, visited):
     queue = deque([(i, j)])
     visited[i][j] = True
+    value = grid[i][j]
     connected = set()
     connected.add((i, j))
 
-    value = grid[i][j]
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
     while queue:
-        r, c = queue.popleft()
-        for dr, dc in directions:
-            nr, nc = r + dr, c + dc
-            if 0 <= nr < 5 and 0 <= nc < 5 and not visited[nr][nc] and grid[nr][nc] == value:
-                visited[nr][nc] = True
-                queue.append((nr, nc))
-                connected.add((nr, nc))
+        ci, cj = queue.popleft()
+        for di, dj in directions:
+            ni, nj = ci + di, cj + dj
+            if 0 <= ni < 5 and 0 <= nj < 5 and not visited[ni][nj] and grid[ni][nj] == value:
+                visited[ni][nj] = True
+                queue.append((ni, nj))
+                connected.add((ni, nj))
     
     if len(connected) >= 3:
         if flag == 1:
@@ -252,52 +373,38 @@ def bfs(grid, visited, i, j, flag):
     else:
         return 0
 
-def count_and_remove(grid, flag):
-    '''
-    같은 종류의 유물 조각이 3개 이상이 연결된 경우를 찾아 제거하고, 제거된 조각의 수를 반환
-    조각의 수는 유물의 가치
-    '''
-    visited = [[False] * 5 for _ in range(5)]
-    total = 0
-
-    for i in range(5):
-        for j in range(5):
-            if not visited[i][j] and grid[i][j] != 0:
-                total += bfs(grid, visited, i, j, flag)
-    
-    return total
-
-from collections import deque
 def simulate(grid, walls, K):
+    '''
+    각 턴 마다 획득한 유물의 가치의 총합을 출력
+    '''
     results = []
-    # K턴을 진행 ()
-    # 아직 K번의 턴을 진행하지 못했지만, 탐사 진행 과정에서 어떠한 방법을
-    # 사용하더라도 유물을 획득할 수 없었다면 모든 탐사는 그 즉시 종료.
+
     for _ in range(K):
-        best = (-1, 0, 0, 0, []) # 유물 수, 회전 횟수, 열, 행, 회전 결과
+
+        # 1. 여기서 유물 1차 획득을 최대화 하는 회전 결과 리스트 찾음 = tmp==best[-1]
+        best = (-1, 0, 0, 0, []) # 유물 수, 회전 횟수, 열, 행, 결과 리스트
         for rot in range(1, 4):
             for j in range(3):
                 for i in range(3):
-                    temp = [row[:] for row in grid]
+                    tmp = [row[:] for row in grid]
 
                     for _ in range(rot):
-                        temp = rotate(temp, i, j)
+                        tmp = rotate(tmp, i, j)
                     
-                    cnt = count_and_remove(temp, 0)
+                    cnt = count(tmp, 0)
 
                     if cnt > best[0] or (cnt == best[0] and (rot, j, i) < (best[1], best[2], best[3])):
-                        best = (cnt, rot, j, i, temp)
-
+                        best = (cnt, rot, j, i, tmp)
         
         if best[0] == 0:
             break
 
-        # 2. 유물 연쇠 획득
+        # 2. 유물 연쇄 획득
         grid = [row[:] for row in best[4]]
         total_gain = 0
 
         while True:
-            cnt = count_and_remove(grid, 1)
+            cnt = count(grid, 1)
             if cnt == 0:
                 break
 
@@ -307,20 +414,17 @@ def simulate(grid, walls, K):
                 for i in range(4, -1, -1):
                     if grid[i][j] == 0 and walls:
                         grid[i][j] = walls.popleft()
-            
         results.append(total_gain)
     
     print(*results)
 
-
-
-
 def main():
     K, M = map(int, input().split())
+    # 5개의 줄에 걸쳐 유물의 각 행에 있는 유물 조각에 적혀 있는 숫자들이 주어짐
     grid = [list(map(int, input().split())) for _ in range(5)]
 
     walls = deque(map(int, input().split()))
-    
+
     simulate(grid, walls, K)
 
 if __name__ == '__main__':
